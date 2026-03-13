@@ -3,6 +3,7 @@ package srh_project.srh_project.service;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +21,21 @@ public class FuncionarioService {
     // CONFIGURAÇÃO DOS ENDPOINTS
     // ==============================================
     
-    private final String API_BASE = "http://localhost:8081/api";
-    private final String FUNCIONARIOS_URL = API_BASE + "/funcionarios";
-    private final String VENDEDORES_URL = API_BASE + "/vendedores";
-    private final String FOLHA_URL = API_BASE + "/folha";
+    @Value("${api.base.url}")
+    private String API_BASE;
+    
+    private String FUNCIONARIOS_URL;
+    private String VENDEDORES_URL;
+    private String FOLHA_URL;
     
     private final RestTemplate restTemplate = new RestTemplate();
     
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        this.FUNCIONARIOS_URL = API_BASE + "/funcionarios";
+        this.VENDEDORES_URL = API_BASE + "/vendedores";
+        this.FOLHA_URL = API_BASE + "/folha";
+    }
     // ==============================================
     // FUNCIONÁRIOS - CONSULTAS
     // ==============================================

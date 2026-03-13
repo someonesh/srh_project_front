@@ -1,15 +1,14 @@
 package srh_project.srh_project.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import srh_project.srh_project.service.FuncionarioService;
@@ -263,12 +262,12 @@ public class HomeController {
             List<Map<String, Object>> funcionarios = funcionarioService.listarTodos();
             status.put("status", "online");
             status.put("funcionarios", funcionarios.size());
-            status.put("api_url", "http://localhost:8081/api");
+            status.put("api_url", "https://srh-api.onrender.com/api");
             status.put("mensagem", "API conectada com sucesso!");
         } catch (Exception e) {
             status.put("status", "offline");
             status.put("erro", e.getMessage());
-            status.put("api_url", "http://localhost:8081/api");
+            status.put("api_url", "https://srh-api.onrender.com/api");
         }
         return status;
     }
