@@ -30,8 +30,9 @@ public class HomeController {
             List<Map<String, Object>> funcionarios = funcionarioService.listarTodos();
             List<Map<String, Object>> ativos = funcionarioService.listarAtivos();
             
-            // 🔵 USAR FILTRO LOCAL PARA VENDEDORES (em vez de chamada direta à API)
+            // USAR FILTROS LOCAIS (não chamam a API diretamente)
             List<Map<String, Object>> vendedores = funcionarioService.filtrarVendedores();
+            List<Map<String, Object>> aniversariantes = funcionarioService.filtrarAniversariantes();
             
             // Calcular estatísticas
             long total = funcionarios.size();
@@ -51,9 +52,8 @@ public class HomeController {
             model.addAttribute("ultimosFuncionarios", 
                 funcionarios.stream().limit(5).collect(Collectors.toList()));
             
-            // 🔵 USAR FILTRO LOCAL PARA ANIVERSARIANTES (em vez de chamada direta à API)
-            model.addAttribute("aniversariantes", 
-                funcionarioService.filtrarAniversariantes());
+            // Aniversariantes do mês
+            model.addAttribute("aniversariantes", aniversariantes);
             
         } catch (Exception e) {
             System.err.println("Erro ao carregar dados da home: " + e.getMessage());
@@ -97,7 +97,6 @@ public class HomeController {
     @GetMapping("/vendedores")
     public String vendedores(Model model) {
         try {
-            // 🔵 USAR FILTRO LOCAL PARA VENDEDORES
             List<Map<String, Object>> vendedores = funcionarioService.filtrarVendedores();
             Map<String, Object> estatisticas = funcionarioService.getEstatisticasVendedores();
             
@@ -118,7 +117,6 @@ public class HomeController {
     public String folhaPagamento(Model model) {
         try {
             List<Map<String, Object>> ativos = funcionarioService.listarAtivos();
-            // 🔵 USAR FILTRO LOCAL PARA VENDEDORES
             List<Map<String, Object>> vendedores = funcionarioService.filtrarVendedores();
             
             // Calcular totais
@@ -191,7 +189,6 @@ public class HomeController {
         try {
             List<Map<String, Object>> funcionarios = funcionarioService.listarTodos();
             List<Map<String, Object>> ativos = funcionarioService.listarAtivos();
-            // 🔵 USAR FILTRO LOCAL PARA VENDEDORES
             List<Map<String, Object>> vendedores = funcionarioService.filtrarVendedores();
             
             // Estatísticas gerais
