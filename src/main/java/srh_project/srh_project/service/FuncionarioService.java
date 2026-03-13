@@ -157,8 +157,10 @@ public class FuncionarioService {
     }
     
     /**
-     * Listar aniversariantes do mês
+     * 🔴 MÉTODO DESATIVADO - Endpoint não existe na API
+     * Use filtro manual em HomeController.java
      */
+    /*
     public List<Map<String, Object>> buscarAniversariantes() {
         try {
             ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
@@ -173,6 +175,7 @@ public class FuncionarioService {
             return new ArrayList<>();
         }
     }
+    */
     
     /**
      * Resumo geral da empresa
@@ -276,8 +279,10 @@ public class FuncionarioService {
     }
     
     /**
-     * Listar apenas vendedores ativos
+     * 🔴 MÉTODO DESATIVADO - Endpoint não existe na API
+     * Use filtro manual em HomeController.java
      */
+    /*
     public List<Map<String, Object>> listarVendedores() {
         try {
             ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
@@ -292,6 +297,7 @@ public class FuncionarioService {
             return new ArrayList<>();
         }
     }
+    */
     
     /**
      * Listar vendedores inativos
@@ -487,9 +493,14 @@ public class FuncionarioService {
         } catch (Exception e) {
             System.err.println("Erro ao buscar estatísticas de vendedores: " + e.getMessage());
             Map<String, Object> stats = new HashMap<>();
-            stats.put("total", listarVendedores().size());
-            stats.put("ativos", listarVendedores().size());
-            stats.put("inativos", 0);
+            // Usar listarTodos() em vez de listarVendedores()
+            List<Map<String, Object>> todos = listarTodos();
+            List<Map<String, Object>> vendedores = todos.stream()
+                .filter(f -> "Vendas".equals(f.get("departamento")))
+                .collect(Collectors.toList());
+            stats.put("total", vendedores.size());
+            stats.put("ativos", vendedores.stream().filter(v -> Boolean.TRUE.equals(v.get("ativo"))).count());
+            stats.put("inativos", vendedores.stream().filter(v -> Boolean.FALSE.equals(v.get("ativo"))).count());
             return stats;
         }
     }
@@ -760,5 +771,35 @@ public class FuncionarioService {
         }
         
         return totais;
+    }
+
+    /**
+     * 🔵 NOVO MÉTODO: Filtrar vendedores localmente
+     */
+    public List<Map<String, Object>> filtrarVendedores() {
+        return listarTodos().stream()
+            .filter(f -> "Vendas".equals(f.get("departamento")))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 🔵 NOVO MÉTODO: Filtrar aniversariantes localmente
+     */
+    public List<Map<String, Object>> filtrarAniversariantes() {
+        java.time.LocalDate hoje = java.time.LocalDate.now();
+        int mesAtual = hoje.getMonthValue();
+        
+        return listarTodos().stream()
+            .filter(f -> {
+                if (f.get("dataNascimento") == null) return false;
+                try {
+                    String dataStr = f.get("dataNascimento").toString();
+                    java.time.LocalDate dataNasc = java.time.LocalDate.parse(dataStr);
+                    return dataNasc.getMonthValue() == mesAtual;
+                } catch (Exception e) {
+                    return false;
+                }
+            })
+            .collect(Collectors.toList());
     }
 }
