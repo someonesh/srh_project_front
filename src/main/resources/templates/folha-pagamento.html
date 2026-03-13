@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folha de Pagamento - SRH</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        /* ===== TEMA ESCURO ===== */
+        :root {
+            --bg-primary: #0a0c0f;
+            --bg-secondary: #1a1e24;
+            --bg-card: #222831;
+            --bg-card-hover: #2d343d;
+            --text-primary: #ffffff;
+            --text-secondary: #b8c1d1;
+            --accent-primary: #4361ee;
+            --accent-secondary: #7209b7;
+            --border-color: #2f3742;
+            --success: #06d6a0;
+            --warning: #ffb703;
+            --danger: #ef476f;
+            --info: #4cc9f0;
+        }
+
+        body {
+            background: var(--bg-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            background: var(--bg-secondary) !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: var(--text-primary) !important;
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin: 0 5px;
+            border-radius: 8px;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary) !important;
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white !important;
+        }
+
+        /* ===== PAGE HEADER ===== */
+        .page-header {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            margin: 30px 0 20px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .page-header h2 {
+            color: var(--text-primary);
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+        }
+
+        /* ===== RESUMO CARD ===== */
+        .resumo-card {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+        }
+
+        .resumo-card h6 {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .resumo-card h2 {
+            color: white;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        /* ===== PERÍODO SELECTOR ===== */
+        .periodo-selector {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+        }
+
+        .periodo-selector label {
+            color: var(--text-primary);
+        }
+
+        .form-select, .form-control {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .form-select:focus, .form-control:focus {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+
+        /* ===== TABLE CONTAINER ===== */
+        .table-container {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .table-container h5 {
+            color: var(--text-primary);
+        }
+
+        .table {
+            color: var(--text-primary);
+        }
+
+        .table thead th {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .table tbody td {
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        /* ===== CORREÇÃO DO HOVER ===== */
+        .table tbody tr:hover {
+            background: var(--accent-primary) !important;
+            color: white !important;
+        }
+
+        .table tbody tr:hover td {
+            color: white !important;
+        }
+
+        .table tbody tr:hover .badge {
+            background: rgba(255,255,255,0.2) !important;
+            color: white !important;
+        }
+
+        .table tbody tr:hover .vendedor-badge {
+            background: white !important;
+            color: var(--accent-primary) !important;
+        }
+
+        .table tbody tr:hover .text-success {
+            color: white !important;
+        }
+
+        .table tbody tr:hover .text-muted {
+            color: rgba(255,255,255,0.7) !important;
+        }
+
+        .table tbody tr:hover .meta-atingida,
+        .table tbody tr:hover .meta-nao-atingida {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        /* ===== BADGES ===== */
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .bg-secondary {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .bg-success {
+            background: var(--success) !important;
+            color: var(--bg-primary) !important;
+        }
+
+        .bg-warning {
+            background: var(--warning) !important;
+            color: var(--bg-primary) !important;
+        }
+
+        .bg-info {
+            background: var(--info) !important;
+            color: var(--bg-primary) !important;
+        }
+
+        .vendedor-badge {
+            background: var(--info);
+            color: white;
+            font-size: 0.7em;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 5px;
+        }
+
+        .meta-atingida {
+            background: rgba(6, 214, 160, 0.2);
+            color: var(--success);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-left: 5px;
+            border: 1px solid var(--success);
+        }
+
+        .meta-nao-atingida {
+            background: rgba(255, 183, 3, 0.2);
+            color: var(--warning);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-left: 5px;
+            border: 1px solid var(--warning);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-info {
+            background: var(--info);
+            border: none;
+            color: var(--bg-primary);
+        }
+
+        .btn-info:hover {
+            background: var(--info);
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            border: none;
+            color: var(--bg-primary);
+        }
+
+        .btn-success:hover {
+            background: var(--success);
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-primary {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            border-color: var(--text-secondary);
+            color: var(--text-secondary);
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--text-secondary);
+            color: var(--bg-primary);
+        }
+
+        .btn-outline-info {
+            border-color: var(--info);
+            color: var(--info);
+        }
+
+        .btn-outline-info:hover {
+            background: var(--info);
+            color: var(--bg-primary);
+        }
+
+        .btn-outline-warning {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .btn-outline-warning:hover {
+            background: var(--warning);
+            color: var(--bg-primary);
+        }
+
+        .btn-outline-success {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .btn-outline-success:hover {
+            background: var(--success);
+            color: var(--bg-primary);
+        }
+
+        /* ===== BREADCRUMB ===== */
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .breadcrumb-item {
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb-item a {
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            color: var(--accent-primary);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--accent-primary);
+        }
+
+        /* ===== LOADING ===== */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 60px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner-border {
+            color: var(--accent-primary) !important;
+        }
+
+        .loading p {
+            color: var(--text-secondary);
+        }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: var(--bg-card) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        .toast .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            padding: 40px 0;
+            margin-top: 50px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer a:hover {
+            color: var(--text-primary);
+        }
+
+        .footer h5 {
+            color: var(--text-primary);
+        }
+
+        /* ===== MODAL ===== */
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-radius: 15px 15px 0 0;
+            border-bottom: none;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .modal-body {
+            color: var(--text-primary);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+
+        .modal pre {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .page-header div:last-child {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-building"></i> SRH - AlphaSolutions
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/funcionarios">Funcionários</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/folha-pagamento">Folha</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ferias">Férias</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/vendedores">Vendedores</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/relatorios">Relatórios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sobre">Sobre</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active">Folha de Pagamento</li>
+            </ol>
+        </nav>
+
+        <!-- Cabeçalho com botões -->
+        <div class="page-header d-flex justify-content-between align-items-center">
+            <div>
+                <h2><i class="bi bi-cash-stack" style="color: var(--accent-primary);"></i> Folha de Pagamento</h2>
+                <p class="mb-0">Gestão de salários e comissões</p>
+            </div>
+            <div>
+                <!-- 🔥 BOTÃO DE SINCRONIZAR (importa + processa) -->
+                <button class="btn btn-info me-2" onclick="sincronizarComVendas()">
+                    <i class="bi bi-arrow-repeat"></i> Sincronizar com Vendas
+                </button>
+                <button class="btn btn-success" onclick="processarFolha()">
+                    <i class="bi bi-play-circle"></i> Processar Folha
+                </button>
+            </div>
+        </div>
+
+        <!-- Seletor de Período -->
+        <div class="periodo-selector">
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <label class="fw-bold mb-0">Período:</label>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="mesSelect">
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3" selected>Março</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="anoSelect">
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026" selected>2026</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-outline-primary" onclick="filtrarPorPeriodo()">
+                        <i class="bi bi-funnel"></i> Filtrar
+                    </button>
+                </div>
+                <div class="col-md-2 text-end">
+                    <span class="badge bg-info" id="statusFolha">Não processada</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading active">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2">Carregando dados da folha...</p>
+        </div>
+
+        <!-- Conteúdo -->
+        <div id="conteudo" style="display: none;">
+            <!-- Resumo -->
+            <div class="resumo-card">
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <h6>Total Funcionários</h6>
+                        <h2 id="totalFuncionarios">0</h2>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h6>Total Salários</h6>
+                        <h2 id="totalSalarios">0 MTn</h2>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h6>Total Comissões</h6>
+                        <h2 id="totalComissoes">0 MTn</h2>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h6>Total Folha</h6>
+                        <h2 id="totalFolha">0 MTn</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela -->
+            <div class="table-container">
+                <h5 class="mb-3">👥 Detalhamento da Folha - <span id="periodoAtual">Março/2026</span></h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Departamento</th>
+                                <th>Salário Base</th>
+                                <th>Comissões</th>
+                                <th>Salário Bruto</th>
+                                <th>INSS (5%)</th>
+                                <th>Salário Líquido</th>
+                                <th>Meta</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaFolha">
+                            <tr>
+                                <td colspan="10" class="text-center py-4">Nenhum dado encontrado</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões de navegação -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="/" class="btn btn-outline-secondary">Home</a>
+                    <a href="/funcionarios" class="btn btn-outline-primary">Funcionários</a>
+                    <a href="/ferias" class="btn btn-outline-info">Férias</a>
+                    <a href="/vendedores" class="btn btn-outline-info">Vendedores</a>
+                    <a href="/relatorios" class="btn btn-outline-warning">Relatórios</a>
+                    <a href="/sobre" class="btn btn-outline-primary">Sobre</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>SRH - AlphaSolutions</h5>
+                    <p>Folha de Pagamento</p>
+                    <p>
+                        <a href="/" class="me-2">Home</a> |
+                        <a href="/funcionarios" class="me-2">Funcionários</a> |
+                        <a href="/folha-pagamento" class="me-2">Folha</a> |
+                        <a href="/ferias" class="me-2">Férias</a> |
+                        <a href="/vendedores" class="me-2">Vendedores</a> |
+                        <a href="/relatorios" class="me-2">Relatórios</a> |
+                        <a href="/sobre" class="me-2">Sobre</a>
+                    </p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p>&copy; 2026 - Todos os direitos reservados</p>
+                    <p>Versão 1.0.0</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 🔥 CONFIGURAÇÃO DA API
+        const API_BASE = 'https://srh-api.onrender.com/api';
+        const FUNCIONARIOS_URL = API_BASE + '/funcionarios';
+        const COMISSOES_URL = API_BASE + '/comissoes';
+        const INTEGRACAO_URL = API_BASE + '/integracao';
+        
+        let funcionarios = [];
+        let vendedores = [];
+        let comissoes = [];
+        let mesAtual = 3;
+        let anoAtual = 2026;
+        
+        const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        
+        document.addEventListener('DOMContentLoaded', carregarDados);
+
+        // ========== FUNÇÃO DE SINCRONIZAÇÃO ==========
+        async function sincronizarComVendas() {
+            const btn = event.target.closest('button');
+            const textoOriginal = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Sincronizando...';
+            
+            try {
+                const responseImport = await fetch(`${INTEGRACAO_URL}/importar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (!responseImport.ok) throw new Error(`Erro HTTP: ${responseImport.status}`);
+                
+                const resultadoImport = await responseImport.text();
+                
+                // Mostrar resultado
+                mostrarResultadoSincronizacao(resultadoImport);
+                
+                // Recarregar dados
+                await carregarDados();
+                mostrarToast('✅ Sincronização concluída!', 'success');
+                
+            } catch (error) {
+                console.error('Erro na sincronização:', error);
+                mostrarToast('❌ Erro: ' + error.message, 'danger');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = textoOriginal;
+            }
+        }
+
+        function mostrarResultadoSincronizacao(importacao) {
+            const importadas = (importacao.match(/importadas: (\d+)/i) || [])[1] || '0';
+            
+            const modalId = 'modalSincronizacao';
+            let modal = document.getElementById(modalId);
+            
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = modalId;
+                modal.className = 'modal fade';
+                modal.setAttribute('tabindex', '-1');
+                document.body.appendChild(modal);
+            }
+            
+            modal.innerHTML = `
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">✅ Sincronização Concluída</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="text-center mb-3">
+                                <h2 style="color: var(--success);">${importadas}</h2>
+                                <p>comissões importadas</p>
+                            </div>
+                            <pre style="background: var(--bg-secondary); color: var(--text-primary); padding: 10px; border-radius: 5px; max-height: 200px; overflow: auto;">${importacao}</pre>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            new bootstrap.Modal(modal).show();
+        }
+
+        // ========== CARREGAR DADOS ==========
+        async function carregarDados() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('conteudo').style.display = 'none';
+            
+            try {
+                // Carregar funcionários
+                const responseFunc = await fetch(FUNCIONARIOS_URL);
+                if (!responseFunc.ok) throw new Error('Erro ao carregar funcionários');
+                funcionarios = await responseFunc.json();
+                
+                // Filtrar vendedores
+                vendedores = funcionarios.filter(f => f.departamento === 'Vendas');
+                
+                // Carregar comissões do período
+                await carregarComissoes();
+                
+                // Atualizar interface
+                atualizarTabela();
+                atualizarResumo();
+                document.getElementById('periodoAtual').textContent = `${meses[mesAtual-1]}/${anoAtual}`;
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('conteudo').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarToast('❌ Erro: ' + error.message, 'danger');
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        async function carregarComissoes() {
+            comissoes = [];
+            for (const vendedor of vendedores) {
+                try {
+                    const response = await fetch(`${COMISSOES_URL}/vendedor/${vendedor.id}?mes=${mesAtual}&ano=${anoAtual}`);
+                    if (response.ok) {
+                        const comissoesVendedor = await response.json();
+                        comissoesVendedor.forEach(c => {
+                            c.vendedorNome = vendedor.nomeCompleto;
+                            c.vendedorId = vendedor.id;
+                            comissoes.push(c);
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Erro ao carregar comissões do vendedor ${vendedor.id}:`, error);
+                }
+            }
+        }
+
+        // ========== ATUALIZAR INTERFACE ==========
+        function atualizarResumo() {
+            const ativos = funcionarios.filter(f => f.ativo === true);
+            
+            let totalSalarios = ativos.reduce((sum, f) => sum + (f.salarioBase || 0), 0);
+            let totalComissoesValor = comissoes.reduce((sum, c) => sum + (c.valorComissao || 0), 0);
+            let totalFolha = totalSalarios + totalComissoesValor;
+            
+            document.getElementById('totalFuncionarios').textContent = ativos.length;
+            document.getElementById('totalSalarios').textContent = formatarMoeda(totalSalarios);
+            document.getElementById('totalComissoes').textContent = formatarMoeda(totalComissoesValor);
+            document.getElementById('totalFolha').textContent = formatarMoeda(totalFolha);
+        }
+
+        function atualizarTabela() {
+            const tbody = document.getElementById('tabelaFolha');
+            const ativos = funcionarios.filter(f => f.ativo === true);
+            
+            if (ativos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4">Nenhum funcionário ativo</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = ativos.map(funcionario => {
+                const isVendedor = funcionario.departamento === 'Vendas';
+                
+                // Calcular total de comissões do funcionário
+                const comissoesFunc = comissoes.filter(c => c.vendedorId === funcionario.id);
+                const totalComissao = comissoesFunc.reduce((sum, c) => sum + (c.valorComissao || 0), 0);
+                
+                // Calcular se atingiu a meta
+                const metaMensal = funcionario.metaMensal || 50000;
+                const totalVendas = comissoesFunc.reduce((sum, c) => sum + (c.valorVenda || 0), 0);
+                const atingiuMeta = totalVendas >= metaMensal;
+                
+                // Calcular salários
+                const salarioBase = funcionario.salarioBase || 0;
+                const salarioBruto = salarioBase + totalComissao;
+                const inss = salarioBruto * 0.05;
+                const salarioLiquido = salarioBruto - inss;
+                
+                return `
+                <tr>
+                    <td><strong>#${funcionario.id}</strong></td>
+                    <td>
+                        ${funcionario.nomeCompleto}
+                        ${isVendedor ? '<span class="vendedor-badge">Vendedor</span>' : ''}
+                    </td>
+                    <td><span class="badge bg-secondary">${funcionario.departamento || '-'}</span></td>
+                    <td><strong>${formatarMoeda(salarioBase)}</strong></td>
+                    <td>
+                        <span style="color: var(--success); font-weight: bold;">${formatarMoeda(totalComissao)}</span>
+                        ${isVendedor ? `<br><small class="text-muted">${comissoesFunc.length} vendas</small>` : ''}
+                    </td>
+                    <td>${formatarMoeda(salarioBruto)}</td>
+                    <td>${formatarMoeda(inss)}</td>
+                    <td><strong style="color: var(--success);">${formatarMoeda(salarioLiquido)}</strong></td>
+                    <td>
+                        ${isVendedor ? `
+                            <span class="${atingiuMeta ? 'meta-atingida' : 'meta-nao-atingida'}">
+                                ${atingiuMeta ? '✓' : '⏳'} ${formatarMoeda(totalVendas)} / ${formatarMoeda(metaMensal)}
+                            </span>
+                        ` : '-'}
+                    </td>
+                    <td><span class="badge bg-warning">Pendente</span></td>
+                </tr>
+            `}).join('');
+        }
+
+        // ========== PROCESSAR FOLHA ==========
+        async function processarFolha() {
+            if (!confirm(`Processar folha de ${meses[mesAtual-1]}/${anoAtual}?`)) return;
+            
+            const btn = document.querySelector('.btn-success');
+            const textoOriginal = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processando...';
+            
+            try {
+                // Simular processamento
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                mostrarToast(`✅ Folha de ${meses[mesAtual-1]}/${anoAtual} processada!`, 'success');
+                document.getElementById('statusFolha').textContent = 'Processada';
+                document.getElementById('statusFolha').className = 'badge bg-success';
+                
+            } catch (error) {
+                console.error('Erro ao processar:', error);
+                mostrarToast('❌ Erro ao processar: ' + error.message, 'danger');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = textoOriginal;
+            }
+        }
+
+        function filtrarPorPeriodo() {
+            mesAtual = parseInt(document.getElementById('mesSelect').value);
+            anoAtual = parseInt(document.getElementById('anoSelect').value);
+            carregarDados();
+        }
+
+        function formatarMoeda(valor) {
+            if (valor === undefined || valor === null) return '0,00 MTn';
+            return valor.toLocaleString('pt-MZ', { 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2 
+            }) + ' MTn';
+        }
+
+        function mostrarToast(mensagem, tipo = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+            
+            const bgColor = {
+                'success': 'bg-success',
+                'danger': 'bg-danger',
+                'warning': 'bg-warning',
+                'info': 'bg-info'
+            }[tipo] || 'bg-info';
+            
+            const html = `
+                <div id="${toastId}" class="toast align-items-center border-0" role="alert" style="background: var(--${bgColor.replace('bg-', '')}); color: white;">
+                    <div class="d-flex">
+                        <div class="toast-body">${mensagem}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', html);
+            
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
+            toast.show();
+            
+            toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove());
+        }
+    </script>
+</body>
+</html>

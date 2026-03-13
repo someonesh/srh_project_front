@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Férias - SRH</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        /* ===== TEMA ESCURO ===== */
+        :root {
+            --bg-primary: #0a0c0f;
+            --bg-secondary: #1a1e24;
+            --bg-card: #222831;
+            --bg-card-hover: #2d343d;
+            --text-primary: #ffffff;
+            --text-secondary: #b8c1d1;
+            --accent-primary: #4361ee;
+            --accent-secondary: #7209b7;
+            --border-color: #2f3742;
+            --success: #06d6a0;
+            --warning: #ffb703;
+            --danger: #ef476f;
+            --info: #4cc9f0;
+        }
+
+        body {
+            background: var(--bg-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            background: var(--bg-secondary) !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: var(--text-primary) !important;
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin: 0 5px;
+            border-radius: 8px;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary) !important;
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white !important;
+        }
+
+        /* ===== PAGE HEADER ===== */
+        .page-header {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            margin: 30px 0 20px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .page-header h2 {
+            color: var(--text-primary);
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+        }
+
+        .btn-solicitar {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-solicitar:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+        }
+
+        /* ===== CALENDARIO CARD ===== */
+        .calendario-card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .calendario-card h5 {
+            color: var(--text-primary);
+        }
+
+        .calendario-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 15px;
+        }
+
+        .dia-semana {
+            text-align: center;
+            font-weight: bold;
+            color: var(--text-secondary);
+            padding: 5px;
+        }
+
+        .dia {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border-radius: 5px;
+            font-size: 0.9em;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .dia:hover {
+            background: var(--accent-primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .dia.ferias {
+            background: rgba(6, 214, 160, 0.2);
+            color: var(--success);
+            font-weight: bold;
+            border: 1px solid var(--success);
+        }
+
+        .dia.ferias::after {
+            content: "🌴";
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 0.8em;
+        }
+
+        .dia.ferias:hover {
+            background: var(--success);
+            color: white;
+        }
+
+        .dia.hoje {
+            border: 2px solid var(--accent-primary);
+            font-weight: bold;
+        }
+
+        /* ===== FERIAS CARD ===== */
+        .ferias-card {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--accent-primary);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+
+        .ferias-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            background: var(--bg-card-hover);
+        }
+
+        .ferias-card.aprovadas {
+            border-left-color: var(--success);
+        }
+
+        .ferias-card.pendentes {
+            border-left-color: var(--warning);
+        }
+
+        .ferias-card.rejeitadas {
+            border-left-color: var(--danger);
+        }
+
+        /* ===== PROXIMAS FERIAS ===== */
+        .proximas-ferias-item {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--success);
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+        }
+
+        .proximas-ferias-item:hover {
+            transform: translateX(5px);
+            background: var(--bg-card-hover);
+        }
+
+        .proximas-ferias-nome {
+            font-weight: bold;
+            color: var(--success);
+            font-size: 1.1em;
+        }
+
+        .proximas-ferias-periodo {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .proximas-ferias-dias {
+            background: var(--success);
+            color: var(--bg-primary);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            display: inline-block;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        .funcionario-info {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        .badge-cargo {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-size: 0.7em;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 5px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* ===== TABLE ===== */
+        .table {
+            color: var(--text-primary);
+        }
+
+        .table thead th {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .table tbody td {
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        /* ===== CORREÇÃO DO HOVER ===== */
+        .table tbody tr:hover {
+            background: var(--accent-primary) !important;
+            color: white !important;
+        }
+
+        .table tbody tr:hover td {
+            color: white !important;
+        }
+
+        .table tbody tr:hover .badge {
+            background: rgba(255,255,255,0.2) !important;
+            color: white !important;
+        }
+
+        .table tbody tr:hover .btn-success,
+        .table tbody tr:hover .btn-danger,
+        .table tbody tr:hover .btn-info {
+            background: white !important;
+            color: var(--accent-primary) !important;
+        }
+
+        /* ===== BADGES ===== */
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .bg-secondary {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .bg-success {
+            background: var(--success) !important;
+            color: var(--bg-primary) !important;
+        }
+
+        .bg-warning {
+            background: var(--warning) !important;
+            color: var(--bg-primary) !important;
+        }
+
+        .bg-danger {
+            background: var(--danger) !important;
+            color: white !important;
+        }
+
+        .bg-info {
+            background: var(--info) !important;
+            color: var(--bg-primary) !important;
+        }
+
+        .bg-primary {
+            background: var(--accent-primary) !important;
+            color: white !important;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-outline-secondary {
+            border-color: var(--text-secondary);
+            color: var(--text-secondary);
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--text-secondary);
+            color: var(--bg-primary);
+        }
+
+        .btn-success {
+            background: var(--success);
+            border: none;
+            color: var(--bg-primary);
+        }
+
+        .btn-success:hover {
+            background: var(--success);
+            filter: brightness(1.1);
+            transform: scale(1.05);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            border: none;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            filter: brightness(1.1);
+            transform: scale(1.05);
+        }
+
+        .btn-info {
+            background: var(--info);
+            border: none;
+            color: var(--bg-primary);
+        }
+
+        .btn-info:hover {
+            background: var(--info);
+            filter: brightness(1.1);
+            transform: scale(1.05);
+        }
+
+        .btn-outline-primary {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-outline-success {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .btn-outline-success:hover {
+            background: var(--success);
+            color: var(--bg-primary);
+        }
+
+        .btn-outline-info {
+            border-color: var(--info);
+            color: var(--info);
+        }
+
+        .btn-outline-info:hover {
+            background: var(--info);
+            color: var(--bg-primary);
+        }
+
+        .btn-outline-warning {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .btn-outline-warning:hover {
+            background: var(--warning);
+            color: var(--bg-primary);
+        }
+
+        /* ===== BREADCRUMB ===== */
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .breadcrumb-item {
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb-item a {
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            color: var(--accent-primary);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--accent-primary);
+        }
+
+        /* ===== LOADING ===== */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 60px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner-border {
+            color: var(--accent-primary) !important;
+        }
+
+        .loading p {
+            color: var(--text-secondary);
+        }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: var(--bg-card) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        .toast .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            padding: 40px 0;
+            margin-top: 50px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer a:hover {
+            color: var(--text-primary);
+        }
+
+        .footer h5 {
+            color: var(--text-primary);
+        }
+
+        /* ===== MODAL ===== */
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-radius: 15px 15px 0 0;
+            border-bottom: none;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .modal-body {
+            color: var(--text-primary);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+        }
+
+        .form-select, .form-control {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .form-select:focus, .form-control:focus {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+
+        .form-select option {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .text-muted {
+            color: var(--text-secondary) !important;
+        }
+
+        /* ===== TEXT COLORS ===== */
+        .text-success {
+            color: var(--success) !important;
+        }
+
+        .text-warning {
+            color: var(--warning) !important;
+        }
+
+        .text-danger {
+            color: var(--danger) !important;
+        }
+
+        .text-primary {
+            color: var(--accent-primary) !important;
+        }
+
+        hr {
+            background-color: var(--border-color);
+            opacity: 0.5;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .page-header div:last-child {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-building"></i> SRH - AlphaSolutions
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="bi bi-house-door"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/funcionarios">
+                            <i class="bi bi-people"></i> Funcionários
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/folha-pagamento">
+                            <i class="bi bi-cash-stack"></i> Folha
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/ferias">
+                            <i class="bi bi-calendar-check"></i> Férias
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/vendedores">
+                            <i class="bi bi-shop"></i> Vendedores
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/relatorios">
+                            <i class="bi bi-file-text"></i> Relatórios
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sobre">
+                            <i class="bi bi-info-circle"></i> Sobre
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active">Férias</li>
+            </ol>
+        </nav>
+
+        <!-- Cabeçalho -->
+        <div class="page-header d-flex justify-content-between align-items-center">
+            <div>
+                <h2><i class="bi bi-calendar-check" style="color: var(--accent-primary);"></i> Gestão de Férias</h2>
+                <p class="mb-0">Controle de períodos de férias e afastamentos</p>
+            </div>
+            <div>
+                <button class="btn-solicitar" data-bs-toggle="modal" data-bs-target="#modalSolicitarFerias">
+                    <i class="bi bi-plus-circle"></i> Solicitar Férias
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2">Carregando dados de férias...</p>
+        </div>
+
+        <!-- Conteúdo -->
+        <div id="conteudo">
+            <div class="row">
+                <div class="col-md-8">
+                    <!-- Calendário -->
+                    <div class="calendario-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">📅 Calendário de Férias - <span id="mesAtual">Março 2026</span></h5>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="mesAnterior()">
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="proximoMes()">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="calendario-grid">
+                            <div class="dia-semana">Dom</div>
+                            <div class="dia-semana">Seg</div>
+                            <div class="dia-semana">Ter</div>
+                            <div class="dia-semana">Qua</div>
+                            <div class="dia-semana">Qui</div>
+                            <div class="dia-semana">Sex</div>
+                            <div class="dia-semana">Sáb</div>
+                        </div>
+                        <div class="calendario-grid" id="diasCalendario"></div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <!-- Resumo -->
+                    <div class="calendario-card">
+                        <h5>📊 Resumo de Férias</h5>
+                        <hr>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Total de solicitações:</span>
+                                <strong id="totalSolicitacoes">0</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Aprovadas:</span>
+                                <strong class="text-success" id="totalAprovadas">0</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Pendentes:</span>
+                                <strong class="text-warning" id="totalPendentes">0</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Rejeitadas:</span>
+                                <strong class="text-danger" id="totalRejeitadas">0</strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Próximas Férias -->
+                    <div class="calendario-card">
+                        <h5> Próximas Férias Aprovadas</h5>
+                        <hr>
+                        <div id="proximasFerias"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Solicitações -->
+            <div class="calendario-card mt-3">
+                <h5>Solicitações de Férias</h5>
+                <hr>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Funcionário</th>
+                                <th>Cargo</th>
+                                <th>Departamento</th>
+                                <th>Período</th>
+                                <th>Dias</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaFerias">
+                            <tr>
+                                <td colspan="7" class="text-center py-4">Nenhuma solicitação encontrada</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões de navegação rápida -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="/" class="btn btn-outline-secondary">
+                        <i class="bi bi-house-door"></i> Home
+                    </a>
+                    <a href="/funcionarios" class="btn btn-outline-primary">
+                        <i class="bi bi-people"></i> Funcionários
+                    </a>
+                    <a href="/folha-pagamento" class="btn btn-outline-success">
+                        <i class="bi bi-cash-stack"></i> Folha
+                    </a>
+                    <a href="/vendedores" class="btn btn-outline-info">
+                        <i class="bi bi-shop"></i> Vendedores
+                    </a>
+                    <a href="/relatorios" class="btn btn-outline-warning">
+                        <i class="bi bi-file-text"></i> Relatórios
+                    </a>
+                    <a href="/sobre" class="btn btn-outline-primary">
+                        <i class="bi bi-info-circle"></i> Sobre
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Solicitação -->
+    <div class="modal fade" id="modalSolicitarFerias" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-calendar-plus"></i> Solicitar Férias
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formFerias">
+                        <div class="mb-3">
+                            <label class="form-label">Funcionário</label>
+                            <select class="form-select" id="funcionarioId" required>
+                                <option value="">Selecione um funcionário...</option>
+                                <!-- Preenchido via JavaScript com funcionários reais -->
+                            </select>
+                            <small class="text-muted">Apenas funcionários ativos são exibidos</small>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Data Início</label>
+                                <input type="date" class="form-control" id="dataInicio" required 
+                                       min="2026-01-01" max="2026-12-31">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Data Fim</label>
+                                <input type="date" class="form-control" id="dataFim" required
+                                       min="2026-01-01" max="2026-12-31">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="solicitarFerias()">Solicitar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>SRH - AlphaSolutions</h5>
+                    <p>Gestão de Férias</p>
+                    <p>
+                        <a href="/" class="me-2">Home</a> |
+                        <a href="/funcionarios" class="me-2">Funcionários</a> |
+                        <a href="/folha-pagamento" class="me-2">Folha</a> |
+                        <a href="/ferias" class="me-2">Férias</a> |
+                        <a href="/vendedores" class="me-2">Vendedores</a> |
+                        <a href="/relatorios" class="me-2">Relatórios</a> |
+                        <a href="/sobre" class="me-2">Sobre</a>
+                    </p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p>&copy; 2026 - Todos os direitos reservados</p>
+                    <p>Versão 1.0.0</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Configuração da API
+    const API_BASE = 'https://srh-api.onrender.com/api';
+    const FUNCIONARIOS_URL = API_BASE + '/funcionarios';
+    const FERIAS_URL = API_BASE + '/ferias';
+    
+    let dataAtual = new Date();
+    let ferias = [];
+    let funcionarios = [];
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        carregarFuncionarios();
+        carregarFerias();
+    });
+
+    // ==============================================
+    // FUNÇÕES DE CARREGAMENTO
+    // ==============================================
+
+    async function carregarFuncionarios() {
+        try {
+            console.log('Carregando funcionários...');
+            const response = await fetch(FUNCIONARIOS_URL);
+            
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            
+            funcionarios = await response.json();
+            console.log('Funcionários carregados:', funcionarios.length);
+            
+            preencherSelectFuncionarios();
+            
+        } catch (error) {
+            console.error('Erro ao carregar funcionários:', error);
+            mostrarToast('Erro ao carregar lista de funcionários', 'danger');
+        }
+    }
+
+    function preencherSelectFuncionarios() {
+        const select = document.getElementById('funcionarioId');
+        
+        const ativos = funcionarios.filter(f => f.ativo === true);
+        
+        if (ativos.length === 0) {
+            select.innerHTML = '<option value="">Nenhum funcionário ativo disponível</option>';
+            return;
+        }
+        
+        let options = '<option value="">Selecione um funcionário...</option>';
+        
+        ativos.sort((a, b) => a.nomeCompleto.localeCompare(b.nomeCompleto))
+              .forEach(func => {
+                  options += `<option value="${func.id}">${func.nomeCompleto} (${func.cargo || 'Sem cargo'})</option>`;
+              });
+        
+        select.innerHTML = options;
+    }
+
+    function getFuncionarioById(id) {
+        return funcionarios.find(f => f.id == id);
+    }
+
+    async function carregarFerias() {
+        mostrarLoading(true);
+        
+        try {
+            const response = await fetch(FERIAS_URL);
+            if (response.ok) {
+                ferias = await response.json();
+                console.log('Férias carregadas:', ferias.length);
+            } else {
+                ferias = [];
+            }
+            
+            atualizarCalendario();
+            atualizarLista();
+            atualizarResumo();
+            atualizarProximasFerias();
+            
+        } catch (error) {
+            console.error('Erro ao carregar férias:', error);
+            mostrarToast('Erro ao carregar férias', 'danger');
+            ferias = [];
+        } finally {
+            mostrarLoading(false);
+        }
+    }
+    
+    // ==============================================
+    // FUNÇÕES DE ATUALIZAÇÃO
+    // ==============================================
+    
+    function atualizarCalendario() {
+        const primeiroDia = new Date(dataAtual.getFullYear(), dataAtual.getMonth(), 1);
+        const ultimoDia = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, 0);
+        
+        const dias = [];
+        const diasNoMes = ultimoDia.getDate();
+        const primeiroDiaSemana = primeiroDia.getDay();
+        
+        for (let i = 0; i < primeiroDiaSemana; i++) {
+            dias.push('<div class="dia"></div>');
+        }
+        
+        const hoje = new Date();
+        for (let i = 1; i <= diasNoMes; i++) {
+            const dataStr = `${dataAtual.getFullYear()}-${String(dataAtual.getMonth()+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+            const temFerias = ferias.some(f => {
+                const dataInicio = f.dataInicio ? f.dataInicio.substring(0,10) : '';
+                const dataFim = f.dataFim ? f.dataFim.substring(0,10) : '';
+                return dataStr >= dataInicio && dataStr <= dataFim;
+            });
+            const ehHoje = hoje.getDate() === i && 
+                          hoje.getMonth() === dataAtual.getMonth() && 
+                          hoje.getFullYear() === dataAtual.getFullYear();
+            
+            dias.push(`<div class="dia ${temFerias ? 'ferias' : ''} ${ehHoje ? 'hoje' : ''}">${i}</div>`);
+        }
+        
+        document.getElementById('diasCalendario').innerHTML = dias.join('');
+        
+        const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        document.getElementById('mesAtual').innerHTML = `${meses[dataAtual.getMonth()]} ${dataAtual.getFullYear()}`;
+    }
+    
+    function atualizarLista() {
+        const container = document.getElementById('listaFerias');
+        
+        if (!ferias || ferias.length === 0) {
+            container.innerHTML = '<tr><td colspan="7" class="text-center py-4">Nenhuma solicitação encontrada</td></tr>';
+            return;
+        }
+        
+        container.innerHTML = ferias.map(f => {
+            const statusClass = f.status === 'aprovadas' ? 'bg-success' : 
+                               f.status === 'pendentes' ? 'bg-warning' : 'bg-danger';
+            const statusText = f.status === 'aprovadas' ? '✓ Aprovada' :
+                              f.status === 'pendentes' ? '⏳ Pendente' : '✗ Rejeitada';
+            
+            return `
+                <tr>
+                    <td><strong>${f.funcionarioNome}</strong></td>
+                    <td>${f.funcionarioCargo || '-'}</td>
+                    <td><span class="badge bg-secondary">${f.funcionarioDepartamento || '-'}</span></td>
+                    <td>${formatarData(f.dataInicio)} - ${formatarData(f.dataFim)}</td>
+                    <td>${f.dias} dias</td>
+                    <td>
+                        <span class="badge ${statusClass}">${statusText}</span>
+                    </td>
+                    <td>
+                        ${f.status === 'pendentes' ? `
+                            <button class="btn btn-sm btn-success me-1" onclick="aprovarFerias(${f.id})" title="Aprovar">
+                                <i class="bi bi-check"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="rejeitarFerias(${f.id})" title="Rejeitar">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        ` : `
+                            <button class="btn btn-sm btn-info" onclick="verDetalhes(${f.id})" title="Ver detalhes">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        `}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+    
+    function atualizarProximasFerias() {
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        
+        const proximas = ferias
+            .filter(f => {
+                if (f.status !== 'aprovadas') return false;
+                const dataInicio = new Date(f.dataInicio);
+                dataInicio.setHours(0, 0, 0, 0);
+                return dataInicio >= hoje;
+            })
+            .sort((a, b) => new Date(a.dataInicio) - new Date(b.dataInicio))
+            .slice(0, 5);
+        
+        const container = document.getElementById('proximasFerias');
+        
+        if (proximas.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-3" style="color: var(--text-secondary);">
+                    <i class="bi bi-calendar-x" style="font-size: 2em;"></i>
+                    <p class="mt-2">Nenhuma férias programada</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = proximas.map(f => {
+            const dataInicio = new Date(f.dataInicio);
+            const dataFim = new Date(f.dataFim);
+            
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            const diasParaInicio = Math.ceil((dataInicio - hoje) / (1000 * 60 * 60 * 24));
+            
+            let badgeInicio = '';
+            if (diasParaInicio === 0) {
+                badgeInicio = '<span class="badge bg-warning ms-2">Hoje!</span>';
+            } else if (diasParaInicio === 1) {
+                badgeInicio = '<span class="badge bg-info ms-2">Amanhã</span>';
+            } else if (diasParaInicio <= 7) {
+                badgeInicio = `<span class="badge bg-primary ms-2">Em ${diasParaInicio} dias</span>`;
+            }
+            
+            return `
+                <div class="proximas-ferias-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="proximas-ferias-nome">
+                                <i class="bi bi-person-circle me-1"></i>${f.funcionarioNome}
+                            </span>
+                            ${badgeInicio}
+                        </div>
+                    </div>
+                    <div class="funcionario-info mt-1">
+                        <span class="badge-cargo">${f.funcionarioCargo || 'Sem cargo'}</span>
+                        <span class="badge bg-secondary ms-1">${f.funcionarioDepartamento || 'Sem depto'}</span>
+                    </div>
+                    <div class="proximas-ferias-periodo">
+                        <i class="bi bi-calendar-range me-1"></i>
+                        ${formatarData(f.dataInicio)} - ${formatarData(f.dataFim)}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span class="proximas-ferias-dias">
+                            <i class="bi bi-sun"></i> ${f.dias} dias de férias
+                        </span>
+                        <small style="color: var(--text-secondary);">
+                            <i class="bi bi-clock"></i> Início ${formatarDataRelativa(dataInicio)}
+                        </small>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    function atualizarResumo() {
+        document.getElementById('totalSolicitacoes').innerHTML = ferias.length;
+        document.getElementById('totalAprovadas').innerHTML = ferias.filter(f => f.status === 'aprovadas').length;
+        document.getElementById('totalPendentes').innerHTML = ferias.filter(f => f.status === 'pendentes').length;
+        document.getElementById('totalRejeitadas').innerHTML = ferias.filter(f => f.status === 'rejeitadas').length;
+    }
+    
+    // ==============================================
+    // FUNÇÕES DE NAVEGAÇÃO
+    // ==============================================
+    
+    function mesAnterior() {
+        dataAtual.setMonth(dataAtual.getMonth() - 1);
+        atualizarCalendario();
+    }
+    
+    function proximoMes() {
+        dataAtual.setMonth(dataAtual.getMonth() + 1);
+        atualizarCalendario();
+    }
+    
+    // ==============================================
+    // FUNÇÕES DE AÇÃO
+    // ==============================================
+    
+    async function solicitarFerias() {
+        const form = document.getElementById('formFerias');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        
+        const funcionarioId = document.getElementById('funcionarioId').value;
+        const dataInicio = document.getElementById('dataInicio').value;
+        const dataFim = document.getElementById('dataFim').value;
+        
+        if (!funcionarioId) {
+            mostrarToast('Selecione um funcionário', 'warning');
+            return;
+        }
+        
+        if (new Date(dataFim) <= new Date(dataInicio)) {
+            mostrarToast('Data fim deve ser posterior à data início', 'warning');
+            return;
+        }
+        
+        const funcionario = getFuncionarioById(funcionarioId);
+        
+        if (!funcionario) {
+            mostrarToast('Funcionário não encontrado', 'danger');
+            return;
+        }
+        
+        if (!funcionario.ativo) {
+            mostrarToast('Funcionário inativo não pode solicitar férias', 'warning');
+            return;
+        }
+        
+        const btnSubmit = document.querySelector('#modalSolicitarFerias .btn-primary');
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Solicitando...';
+        
+        try {
+            const response = await fetch(`${FERIAS_URL}/solicitar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    funcionarioId: parseInt(funcionarioId),
+                    dataInicio: dataInicio,
+                    dataFim: dataFim,
+                    observacao: ''
+                })
+            });
+            
+            if (response.ok) {
+                const resultado = await response.json();
+                mostrarToast(`✅ Férias solicitadas para ${funcionario.nomeCompleto}!`, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('modalSolicitarFerias')).hide();
+                form.reset();
+                await carregarFerias();
+            } else {
+                const erro = await response.json();
+                mostrarToast('❌ Erro: ' + (erro.erro || 'Erro ao solicitar'), 'danger');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            mostrarToast('❌ Erro ao solicitar férias', 'danger');
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = 'Solicitar';
+        }
+    }
+    
+    async function aprovarFerias(id) {
+        if (confirm('Aprovar esta solicitação de férias?')) {
+            try {
+                const response = await fetch(`${FERIAS_URL}/${id}/aprovar`, {
+                    method: 'PATCH'
+                });
+                
+                if (response.ok) {
+                    mostrarToast('✅ Férias aprovadas!', 'success');
+                    await carregarFerias();
+                } else {
+                    const erro = await response.json();
+                    mostrarToast('❌ Erro: ' + erro.erro, 'danger');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarToast('❌ Erro ao aprovar', 'danger');
+            }
+        }
+    }
+    
+    async function rejeitarFerias(id) {
+        if (confirm('Rejeitar esta solicitação de férias?')) {
+            try {
+                const response = await fetch(`${FERIAS_URL}/${id}/rejeitar`, {
+                    method: 'PATCH'
+                });
+                
+                if (response.ok) {
+                    mostrarToast('❌ Férias rejeitadas!', 'warning');
+                    await carregarFerias();
+                } else {
+                    const erro = await response.json();
+                    mostrarToast('❌ Erro: ' + erro.erro, 'danger');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarToast('❌ Erro ao rejeitar', 'danger');
+            }
+        }
+    }
+    
+    async function verDetalhes(id) {
+        try {
+            const response = await fetch(`${FERIAS_URL}/${id}`);
+            if (!response.ok) throw new Error('Erro ao carregar');
+            
+            const f = await response.json();
+            
+            alert(`
+                DETALHES DA SOLICITAÇÃO
+                
+                Funcionário: ${f.funcionarioNome}
+                Cargo: ${f.funcionarioCargo || 'Não informado'}
+                Departamento: ${f.funcionarioDepartamento || 'Não informado'}
+                
+                Período: ${formatarData(f.dataInicio)} - ${formatarData(f.dataFim)}
+                Duração: ${f.dias} dias
+                
+                Status: ${f.status.toUpperCase()}
+                Data Solicitação: ${f.dataSolicitacao ? new Date(f.dataSolicitacao).toLocaleDateString('pt-PT') : '-'}
+                ${f.dataAprovacao ? 'Data Aprovação: ' + new Date(f.dataAprovacao).toLocaleDateString('pt-PT') : ''}
+                
+                ID da Solicitação: #${f.id}
+            `);
+            
+        } catch (error) {
+            console.error('Erro:', error);
+            mostrarToast('❌ Erro ao carregar detalhes', 'danger');
+        }
+    }
+    
+    // ==============================================
+    // FUNÇÕES AUXILIARES
+    // ==============================================
+    
+    function formatarData(data) {
+        if (!data) return '-';
+        return new Date(data).toLocaleDateString('pt-PT');
+    }
+    
+    function formatarDataRelativa(data) {
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        const diff = Math.ceil((data - hoje) / (1000 * 60 * 60 * 24));
+        
+        if (diff === 0) return 'hoje';
+        if (diff === 1) return 'amanhã';
+        if (diff < 0) return `${Math.abs(diff)} dias atrás`;
+        return `em ${diff} dias`;
+    }
+    
+    function mostrarLoading(mostrar) {
+        const loading = document.getElementById('loading');
+        const conteudo = document.getElementById('conteudo');
+        
+        if (mostrar) {
+            loading.style.display = 'block';
+            conteudo.style.display = 'none';
+        } else {
+            loading.style.display = 'none';
+            conteudo.style.display = 'block';
+        }
+    }
+    
+    function mostrarToast(mensagem, tipo = 'info') {
+        const toastContainer = document.getElementById('toastContainer');
+        const toastId = 'toast-' + Date.now();
+        
+        const bgColor = {
+            'success': 'bg-success',
+            'danger': 'bg-danger',
+            'warning': 'bg-warning',
+            'info': 'bg-info'
+        }[tipo] || 'bg-info';
+        
+        const html = `
+            <div id="${toastId}" class="toast align-items-center border-0" role="alert" style="background: var(--${bgColor.replace('bg-', '')}); color: white;">
+                <div class="d-flex">
+                    <div class="toast-body">${mensagem}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+        
+        toastContainer.insertAdjacentHTML('beforeend', html);
+        
+        const toastElement = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
+        toast.show();
+        
+        toastElement.addEventListener('hidden.bs.toast', function() { this.remove(); });
+    }
+</script>
+</body>
+</html>

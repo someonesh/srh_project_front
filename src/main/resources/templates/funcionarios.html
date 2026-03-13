@@ -1,0 +1,1361 @@
+<!-- src/main/resources/templates/funcionarios.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funcionários - SRH</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        /* ===== TEMA ESCURO ===== */
+        :root {
+            --bg-primary: #0a0c0f;
+            --bg-secondary: #1a1e24;
+            --bg-card: #222831;
+            --bg-card-hover: #2d343d;
+            --text-primary: #ffffff;
+            --text-secondary: #b8c1d1;
+            --accent-primary: #4361ee;
+            --accent-secondary: #7209b7;
+            --border-color: #2f3742;
+            --success: #06d6a0;
+            --warning: #ffb703;
+            --danger: #ef476f;
+            --info: #4cc9f0;
+        }
+
+        body {
+            background: var(--bg-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+        }
+        
+        /* ===== NAVBAR ===== */
+        .navbar {
+            background: var(--bg-secondary) !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: var(--text-primary) !important;
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin: 0 5px;
+            border-radius: 8px;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary) !important;
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white !important;
+        }
+        
+        /* ===== PAGE HEADER ===== */
+        .page-header {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+        
+        .page-header h2 {
+            color: var(--text-primary);
+        }
+        
+        .page-header p {
+            color: var(--text-secondary);
+        }
+        
+        /* ===== QUICK STATS ===== */
+        .quick-stats {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-item {
+            text-align: center;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .stat-item:last-child {
+            border-right: none;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--accent-primary);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+        
+        /* ===== FILTER SECTION ===== */
+        .filter-section {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .input-group-text {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .form-control, .form-select {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+        
+        .form-control::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+        
+        /* ===== TABLE CONTAINER ===== */
+        .table-container {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+        }
+        
+        .table {
+            color: var(--text-primary);
+        }
+        
+        .table thead th {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .table tbody td {
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+        
+        /* ===== CORREÇÃO DO HOVER ===== */
+        .table tbody tr:hover {
+            background: var(--accent-primary) !important;
+            color: white !important;
+        }
+        
+        .table tbody tr:hover td {
+            color: white !important;
+        }
+        
+        .table tbody tr:hover .badge {
+            background: rgba(255,255,255,0.2) !important;
+            color: white !important;
+        }
+        
+        .table tbody tr:hover .status-badge {
+            background: rgba(255,255,255,0.2) !important;
+            color: white !important;
+            border-color: white !important;
+        }
+        
+        .table tbody tr:hover .vendedor-badge {
+            background: white !important;
+            color: var(--accent-primary) !important;
+        }
+        
+        .table tbody tr:hover .btn-action {
+            background: white !important;
+            color: var(--accent-primary) !important;
+            border: none;
+        }
+        
+        .table tbody tr:hover .btn-action i {
+            color: var(--accent-primary) !important;
+        }
+        
+        /* ===== BADGES ===== */
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .bg-secondary {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        .vendedor-badge {
+            background: var(--info);
+            color: white;
+            font-size: 0.7em;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 5px;
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        
+        .status-ativo {
+            background: rgba(6, 214, 160, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+        
+        .status-inativo {
+            background: rgba(239, 71, 111, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+        
+        /* ===== BUTTONS ===== */
+        .btn-primary {
+            background: var(--accent-primary);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline-info {
+            border-color: var(--info);
+            color: var(--info);
+        }
+        
+        .btn-outline-info:hover {
+            background: var(--info);
+            color: white;
+        }
+        
+        .btn-outline-warning {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+        
+        .btn-outline-warning:hover {
+            background: var(--warning);
+            color: var(--bg-primary);
+        }
+        
+        .btn-outline-success {
+            border-color: var(--success);
+            color: var(--success);
+        }
+        
+        .btn-outline-success:hover {
+            background: var(--success);
+            color: var(--bg-primary);
+        }
+        
+        .btn-outline-secondary {
+            border-color: var(--text-secondary);
+            color: var(--text-secondary);
+        }
+        
+        .btn-outline-secondary:hover {
+            background: var(--text-secondary);
+            color: var(--bg-primary);
+        }
+        
+        .btn-action {
+            margin: 0 2px;
+            padding: 5px 10px;
+            font-size: 0.8em;
+            transition: all 0.2s;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-action:hover {
+            transform: scale(1.1);
+            background: var(--accent-primary) !important;
+            color: white !important;
+            border-color: var(--accent-primary);
+        }
+        
+        .btn-action:hover i {
+            color: white !important;
+        }
+        
+        .btn-info {
+            background: var(--info);
+            border: none;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            border: none;
+            color: var(--bg-primary);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            border: none;
+            color: white;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            border: none;
+            color: var(--bg-primary);
+        }
+        
+        /* ===== MODAL ===== */
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-radius: 15px 15px 0 0;
+            border-bottom: none;
+        }
+        
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+        
+        .modal-body {
+            color: var(--text-primary);
+        }
+        
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .form-label {
+            color: var(--text-secondary);
+        }
+        
+        .alert-info {
+            background: rgba(76, 201, 240, 0.1);
+            color: var(--info);
+            border: 1px solid var(--info);
+        }
+        
+        .alert-info a {
+            color: var(--info);
+            font-weight: bold;
+        }
+        
+        /* ===== PAGINATION ===== */
+        .pagination {
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .page-link {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        .page-link:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+        
+        .page-item.active .page-link {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+        
+        .page-item.disabled .page-link {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+        
+        /* ===== BREADCRUMB ===== */
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .breadcrumb-item {
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb-item a {
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            color: var(--accent-primary);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--accent-primary);
+        }
+        
+        /* ===== LOADING ===== */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner-border {
+            color: var(--accent-primary) !important;
+        }
+        
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: var(--bg-card) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+        
+        .toast .btn-close {
+            filter: brightness(0) invert(1);
+        }
+        
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            padding: 40px 0;
+            margin-top: 50px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer a:hover {
+            color: var(--text-primary);
+        }
+        
+        .footer h5 {
+            color: var(--text-primary);
+        }
+        
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .stat-item {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: 10px 0;
+            }
+            .stat-item:last-child {
+                border-bottom: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-building"></i> SRH - AlphaSolutions
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="bi bi-house-door"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/funcionarios">
+                            <i class="bi bi-people"></i> Funcionários
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/folha-pagamento">
+                            <i class="bi bi-cash-stack"></i> Folha
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ferias">
+                            <i class="bi bi-calendar-check"></i> Férias
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/vendedores">
+                            <i class="bi bi-shop"></i> Vendedores
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/relatorios">
+                            <i class="bi bi-file-text"></i> Relatórios
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sobre">
+                            <i class="bi bi-info-circle"></i> Sobre
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Toast Container -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Funcionários</li>
+            </ol>
+        </nav>
+
+        <!-- Cabeçalho -->
+        <div class="page-header d-flex justify-content-between align-items-center">
+            <div>
+                <h2><i class="bi bi-people-fill" style="color: var(--accent-primary);"></i> Gestão de Funcionários</h2>
+                <p class="mb-0">Gerencie todos os funcionários da empresa</p>
+            </div>
+            <div>
+                <a href="/vendedores" class="btn btn-outline-info me-2">
+                    <i class="bi bi-shop"></i> Ver Vendedores
+                </a>
+                <a href="/relatorios" class="btn btn-outline-warning me-2">
+                    <i class="bi bi-file-text"></i> Relatórios
+                </a>
+                <a href="/folha-pagamento" class="btn btn-outline-success me-2">
+                    <i class="bi bi-cash-stack"></i> Folha
+                </a>
+                <button class="btn btn-primary" onclick="abrirModalNovo()">
+                    <i class="bi bi-person-plus"></i> Novo Funcionário
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+            <div class="row" id="quickStats">
+                <div class="col-md-3 stat-item">
+                    <div class="stat-value" id="totalCount">0</div>
+                    <div class="stat-label">Total Funcionários</div>
+                </div>
+                <div class="col-md-3 stat-item">
+                    <div class="stat-value" id="ativosCount">0</div>
+                    <div class="stat-label">Ativos</div>
+                </div>
+                <div class="col-md-3 stat-item">
+                    <div class="stat-value" id="inativosCount">0</div>
+                    <div class="stat-label">Inativos</div>
+                </div>
+                <div class="col-md-3 stat-item">
+                    <div class="stat-value" id="vendedoresCount">0</div>
+                    <div class="stat-label">Vendedores</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filter-section">
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" id="searchNome" 
+                               placeholder="Buscar por nome..." onkeyup="filtrarPorNome()">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" id="searchEmail" 
+                           placeholder="Email..." onkeyup="filtrarPorEmail()">
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="filtroDepartamento" onchange="filtrarPorDepartamento()">
+                        <option value="">Todos departamentos</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="filtroContrato" onchange="filtrarPorContrato()">
+                        <option value="">Todos contratos</option>
+                        <option value="CLT">CLT</option>
+                        <option value="PJ">PJ</option>
+                        <option value="Estágio">Estágio</option>
+                        <option value="Temporário">Temporário</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="filtroStatus" onchange="filtrarPorStatus()">
+                        <option value="">Todos status</option>
+                        <option value="ativos">Ativos</option>
+                        <option value="inativos">Inativos</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-outline-secondary w-100" onclick="limparFiltros()">
+                        <i class="bi bi-eraser"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Funcionários -->
+        <div class="table-container">
+            <div class="loading active" id="loading">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-2">Carregando funcionários...</p>
+            </div>
+
+            <div class="table-responsive" id="tableContainer" style="display: none;">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Departamento</th>
+                            <th>Cargo</th>
+                            <th>Salário Base</th>
+                            <th>Contrato</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaFuncionarios"></tbody>
+                </table>
+
+                <!-- Paginação -->
+                <nav>
+                    <ul class="pagination" id="pagination"></ul>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Botões de navegação rápida -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="/" class="btn btn-outline-secondary">
+                        <i class="bi bi-house-door"></i> Home
+                    </a>
+                    <a href="/folha-pagamento" class="btn btn-outline-success">
+                        <i class="bi bi-cash-stack"></i> Folha
+                    </a>
+                    <a href="/ferias" class="btn btn-outline-info">
+                        <i class="bi bi-calendar-check"></i> Férias
+                    </a>
+                    <a href="/vendedores" class="btn btn-outline-info">
+                        <i class="bi bi-shop"></i> Vendedores
+                    </a>
+                    <a href="/relatorios" class="btn btn-outline-warning">
+                        <i class="bi bi-file-text"></i> Relatórios
+                    </a>
+                    <a href="/sobre" class="btn btn-outline-primary">
+                        <i class="bi bi-info-circle"></i> Sobre
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Funcionário -->
+    <div class="modal fade" id="funcionarioModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">
+                        <i class="bi bi-person-plus"></i> Novo Funcionário
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formFuncionario">
+                        <input type="hidden" id="funcionarioId">
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nomeCompleto" class="form-label">Nome Completo *</label>
+                                <input type="text" class="form-control" id="nomeCompleto" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="dataNascimento" class="form-label">Data de Nascimento *</label>
+                                <input type="date" class="form-control" id="dataNascimento" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="telefone" class="form-label">Telefone *</label>
+                                <input type="text" class="form-control" id="telefone" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="cargo" class="form-label">Cargo *</label>
+                                <input type="text" class="form-control" id="cargo" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="departamento" class="form-label">Departamento *</label>
+                                <input type="text" class="form-control" id="departamento" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="salarioBase" class="form-label">Salário Base (MTn) *</label>
+                                <input type="number" step="0.01" class="form-control" id="salarioBase" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="tipoContrato" class="form-label">Tipo de Contrato *</label>
+                                <select class="form-select" id="tipoContrato" required>
+                                    <option value="CLT">CLT</option>
+                                    <option value="PJ">PJ</option>
+                                    <option value="Estágio">Estágio</option>
+                                    <option value="Temporário">Temporário</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- AVISO: Funcionário não vendedor não tem comissão -->
+                        <div class="alert alert-info" id="avisoVendedor" style="display: none;">
+                            <i class="bi bi-info-circle"></i> 
+                            Para cadastrar um vendedor, vá para a página de <a href="/vendedores" class="alert-link">Vendedores</a>.
+                            Funcionários comuns não recebem comissões.
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="endereco" class="form-label">Endereço</label>
+                            <input type="text" class="form-control" id="endereco">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="dataContratacao" class="form-label">Data de Contratação *</label>
+                            <input type="date" class="form-control" id="dataContratacao" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x"></i> Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="salvarFuncionario()">
+                        <i class="bi bi-check"></i> Salvar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes -->
+    <div class="modal fade" id="detalhesModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background: var(--info);">
+                    <h5 class="modal-title">
+                        <i class="bi bi-person-badge"></i> Detalhes do Funcionário
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detalhesContent">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>SRH - AlphaSolutions</h5>
+                    <p>Sistema de Recursos Humanos</p>
+                    <p>
+                        <a href="/" class="me-2">Home</a> |
+                        <a href="/funcionarios" class="me-2">Funcionários</a> |
+                        <a href="/folha-pagamento" class="me-2">Folha</a> |
+                        <a href="/ferias" class="me-2">Férias</a> |
+                        <a href="/vendedores" class="me-2">Vendedores</a> |
+                        <a href="/relatorios" class="me-2">Relatórios</a> |
+                        <a href="/sobre" class="me-2">Sobre</a>
+                    </p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p>&copy; 2026 - Todos os direitos reservados</p>
+                    <p>Versão 1.0.0</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Configuração dos endpoints
+        const API_BASE = 'https://srh-api.onrender.com/api';
+        const FUNCIONARIOS_URL = API_BASE + '/funcionarios';
+        
+        let funcionarios = [];
+        let funcionariosFiltrados = [];
+        let paginaAtual = 1;
+        const itensPorPagina = 10;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Conectando à API de funcionários:', FUNCIONARIOS_URL);
+            carregarFuncionarios();
+            carregarDepartamentos();
+            
+            // Monitorar mudanças no campo departamento - se for Vendas, mostrar aviso
+            document.getElementById('departamento').addEventListener('input', function() {
+                const isVendedor = this.value.toUpperCase() === 'VENDAS';
+                document.getElementById('avisoVendedor').style.display = isVendedor ? 'block' : 'none';
+            });
+        });
+
+        // ==============================================
+        // FUNÇÕES DE CARREGAMENTO
+        // ==============================================
+
+        async function carregarFuncionarios() {
+            mostrarLoading(true);
+            
+            try {
+                const response = await fetch(FUNCIONARIOS_URL);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                funcionarios = await response.json();
+                console.log('Funcionários carregados:', funcionarios);
+                
+                funcionariosFiltrados = [...funcionarios];
+                atualizarQuickStats();
+                renderizarTabela();
+                
+            } catch (error) {
+                console.error('Erro ao carregar funcionários:', error);
+                mostrarToast('Erro ao carregar funcionários: ' + error.message, 'danger');
+            } finally {
+                mostrarLoading(false);
+            }
+        }
+
+        function atualizarQuickStats() {
+            const total = funcionarios.length;
+            const ativos = funcionarios.filter(f => f.ativo === true).length;
+            const inativos = total - ativos;
+            const vendedores = funcionarios.filter(f => f.departamento === 'Vendas').length;
+            
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('ativosCount').textContent = ativos;
+            document.getElementById('inativosCount').textContent = inativos;
+            document.getElementById('vendedoresCount').textContent = vendedores;
+        }
+
+        async function carregarDepartamentos() {
+            try {
+                const departamentos = [...new Set(funcionarios.map(f => f.departamento).filter(Boolean))];
+                const select = document.getElementById('filtroDepartamento');
+                
+                select.innerHTML = '<option value="">Todos departamentos</option>';
+                
+                departamentos.sort().forEach(depto => {
+                    const option = document.createElement('option');
+                    option.value = depto;
+                    option.textContent = depto;
+                    select.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error('Erro ao carregar departamentos:', error);
+            }
+        }
+
+        // ==============================================
+        // FUNÇÕES DE FILTRAGEM
+        // ==============================================
+
+        function filtrarPorNome() {
+            aplicarFiltros();
+        }
+
+        function filtrarPorEmail() {
+            aplicarFiltros();
+        }
+
+        function filtrarPorDepartamento() {
+            aplicarFiltros();
+        }
+
+        function filtrarPorContrato() {
+            aplicarFiltros();
+        }
+
+        function filtrarPorStatus() {
+            aplicarFiltros();
+        }
+
+        function aplicarFiltros() {
+            const nomeTermo = document.getElementById('searchNome').value.toLowerCase();
+            const emailTermo = document.getElementById('searchEmail').value.toLowerCase();
+            const depto = document.getElementById('filtroDepartamento').value;
+            const contrato = document.getElementById('filtroContrato').value;
+            const status = document.getElementById('filtroStatus').value;
+            
+            funcionariosFiltrados = funcionarios.filter(f => {
+                let match = true;
+                
+                if (nomeTermo) {
+                    match = match && (f.nomeCompleto && f.nomeCompleto.toLowerCase().includes(nomeTermo));
+                }
+                
+                if (emailTermo) {
+                    match = match && (f.email && f.email.toLowerCase().includes(emailTermo));
+                }
+                
+                if (depto) {
+                    match = match && (f.departamento === depto);
+                }
+                
+                if (contrato) {
+                    match = match && (f.tipoContrato === contrato);
+                }
+                
+                if (status === 'ativos') {
+                    match = match && f.ativo === true;
+                } else if (status === 'inativos') {
+                    match = match && f.ativo === false;
+                }
+                
+                return match;
+            });
+            
+            paginaAtual = 1;
+            renderizarTabela();
+        }
+
+        function limparFiltros() {
+            document.getElementById('searchNome').value = '';
+            document.getElementById('searchEmail').value = '';
+            document.getElementById('filtroDepartamento').value = '';
+            document.getElementById('filtroContrato').value = '';
+            document.getElementById('filtroStatus').value = '';
+            
+            funcionariosFiltrados = [...funcionarios];
+            paginaAtual = 1;
+            renderizarTabela();
+        }
+
+        // ==============================================
+        // FUNÇÕES DE RENDERIZAÇÃO
+        // ==============================================
+
+        function renderizarTabela() {
+            const tbody = document.getElementById('tabelaFuncionarios');
+            
+            if (!funcionariosFiltrados || funcionariosFiltrados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">Nenhum funcionário encontrado</td></tr>';
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+            
+            const inicio = (paginaAtual - 1) * itensPorPagina;
+            const fim = Math.min(inicio + itensPorPagina, funcionariosFiltrados.length);
+            const funcionariosPagina = funcionariosFiltrados.slice(inicio, fim);
+            
+            tbody.innerHTML = funcionariosPagina.map(func => {
+                const isVendedor = func.departamento === 'Vendas';
+                
+                return `
+                <tr>
+                    <td><strong>#${func.id}</strong></td>
+                    <td>
+                        ${func.nomeCompleto || ''}
+                        ${isVendedor ? '<span class="vendedor-badge">Vendedor</span>' : ''}
+                    </td>
+                    <td><span class="badge bg-secondary">${func.departamento || '-'}</span></td>
+                    <td>${func.cargo || '-'}</td>
+                    <td><strong>${formatarMoeda(func.salarioBase)}</strong></td>
+                    <td>${func.tipoContrato || 'CLT'}</td>
+                    <td>
+                        <span class="status-badge ${func.ativo ? 'status-ativo' : 'status-inativo'}">
+                            ${func.ativo ? 'Ativo' : 'Inativo'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-action" onclick="verDetalhes(${func.id})" title="Ver detalhes" style="background: var(--info); color: white; border: none;">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-action" onclick="editarFuncionario(${func.id})" title="Editar" style="background: var(--warning); color: var(--bg-primary); border: none;">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            ${func.ativo ? 
+                                `<button class="btn btn-sm btn-action" onclick="demitirFuncionario(${func.id})" title="Demitir" style="background: var(--danger); color: white; border: none;">
+                                    <i class="bi bi-person-x"></i>
+                                </button>` :
+                                `<button class="btn btn-sm btn-action" onclick="reativarFuncionario(${func.id})" title="Reativar" style="background: var(--success); color: var(--bg-primary); border: none;">
+                                    <i class="bi bi-person-check"></i>
+                                </button>`
+                            }
+                        </div>
+                    </td>
+                </tr>
+            `}).join('');
+            
+            renderizarPaginacao();
+        }
+
+        function renderizarPaginacao() {
+            const totalPaginas = Math.ceil(funcionariosFiltrados.length / itensPorPagina);
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPaginas <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+            
+            let html = '';
+            
+            html += `
+                <li class="page-item ${paginaAtual === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="mudarPagina(${paginaAtual - 1}); return false;">Anterior</a>
+                </li>
+            `;
+            
+            for (let i = 1; i <= totalPaginas; i++) {
+                if (i === 1 || i === totalPaginas || (i >= paginaAtual - 2 && i <= paginaAtual + 2)) {
+                    html += `
+                        <li class="page-item ${i === paginaAtual ? 'active' : ''}">
+                            <a class="page-link" href="#" onclick="mudarPagina(${i}); return false;">${i}</a>
+                        </li>
+                    `;
+                } else if (i === paginaAtual - 3 || i === paginaAtual + 3) {
+                    html += '<li class="page-item disabled"><a class="page-link" href="#">...</a></li>';
+                }
+            }
+            
+            html += `
+                <li class="page-item ${paginaAtual === totalPaginas ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="mudarPagina(${paginaAtual + 1}); return false;">Próximo</a>
+                </li>
+            `;
+            
+            pagination.innerHTML = html;
+        }
+
+        function mudarPagina(novaPagina) {
+            paginaAtual = novaPagina;
+            renderizarTabela();
+        }
+
+        // ==============================================
+        // FUNÇÕES CRUD
+        // ==============================================
+
+        function abrirModalNovo() {
+            document.getElementById('modalTitle').innerHTML = '<i class="bi bi-person-plus"></i> Novo Funcionário';
+            document.getElementById('formFuncionario').reset();
+            document.getElementById('funcionarioId').value = '';
+            document.getElementById('dataContratacao').value = new Date().toISOString().split('T')[0];
+            document.getElementById('avisoVendedor').style.display = 'none';
+            new bootstrap.Modal(document.getElementById('funcionarioModal')).show();
+        }
+
+        async function editarFuncionario(id) {
+            try {
+                const response = await fetch(`${FUNCIONARIOS_URL}/${id}`);
+                if (!response.ok) throw new Error('Erro ao carregar');
+                const func = await response.json();
+                
+                document.getElementById('modalTitle').innerHTML = '<i class="bi bi-pencil"></i> Editar Funcionário';
+                document.getElementById('funcionarioId').value = func.id;
+                document.getElementById('nomeCompleto').value = func.nomeCompleto || '';
+                document.getElementById('email').value = func.email || '';
+                document.getElementById('dataNascimento').value = func.dataNascimento || '';
+                document.getElementById('telefone').value = func.telefone || '';
+                document.getElementById('cargo').value = func.cargo || '';
+                document.getElementById('departamento').value = func.departamento || '';
+                document.getElementById('salarioBase').value = func.salarioBase || '';
+                document.getElementById('tipoContrato').value = func.tipoContrato || 'CLT';
+                document.getElementById('endereco').value = func.endereco || '';
+                document.getElementById('dataContratacao').value = func.dataContratacao || '';
+                
+                // Mostrar aviso se for vendedor
+                const isVendedor = func.departamento === 'Vendas';
+                document.getElementById('avisoVendedor').style.display = isVendedor ? 'block' : 'none';
+                
+                new bootstrap.Modal(document.getElementById('funcionarioModal')).show();
+                
+            } catch (error) {
+                console.error('Erro ao carregar funcionário:', error);
+                mostrarToast('Erro ao carregar dados do funcionário', 'danger');
+            }
+        }
+
+        async function salvarFuncionario() {
+            if (!document.getElementById('formFuncionario').checkValidity()) {
+                document.getElementById('formFuncionario').reportValidity();
+                return;
+            }
+            
+            // Verificar se é vendedor - se for, redirecionar para página de vendedores
+            const departamento = document.getElementById('departamento').value;
+            if (departamento.toUpperCase() === 'VENDAS') {
+                if (confirm('Funcionários do departamento Vendas devem ser cadastrados como vendedores. Deseja ir para a página de vendedores?')) {
+                    window.location.href = '/vendedores';
+                    return;
+                }
+                return;
+            }
+            
+            const funcionario = {
+                nomeCompleto: document.getElementById('nomeCompleto').value,
+                email: document.getElementById('email').value,
+                dataNascimento: document.getElementById('dataNascimento').value,
+                telefone: document.getElementById('telefone').value,
+                cargo: document.getElementById('cargo').value,
+                departamento: document.getElementById('departamento').value,
+                salarioBase: parseFloat(document.getElementById('salarioBase').value),
+                tipoContrato: document.getElementById('tipoContrato').value,
+                endereco: document.getElementById('endereco').value || null,
+                dataContratacao: document.getElementById('dataContratacao').value
+            };
+            
+            const id = document.getElementById('funcionarioId').value;
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `${FUNCIONARIOS_URL}/${id}` : FUNCIONARIOS_URL;
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(funcionario)
+                });
+                
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('funcionarioModal')).hide();
+                    await carregarFuncionarios();
+                    mostrarToast(id ? 'Funcionário atualizado!' : 'Funcionário criado!', 'success');
+                } else {
+                    const erro = await response.json();
+                    mostrarToast(erro.message || 'Erro ao salvar', 'danger');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao salvar:', error);
+                mostrarToast('Erro ao salvar funcionário', 'danger');
+            }
+        }
+
+        async function verDetalhes(id) {
+            try {
+                const response = await fetch(`${FUNCIONARIOS_URL}/${id}`);
+                if (!response.ok) throw new Error('Erro ao carregar');
+                const func = await response.json();
+                
+                const isVendedor = func.departamento === 'Vendas';
+                
+                let vendedorInfo = '';
+                if (isVendedor) {
+                    vendedorInfo = `
+                        <tr><th style="color: var(--info);">Vendedor:</th><td><span class="badge" style="background: var(--info);">Sim</span></td></tr>
+                        <tr><th>Código Vendedor:</th><td>${func.codigoVendedor || 'Não definido'}</td></tr>
+                        <tr><th>Percentual Comissão:</th><td>${func.percentualComissao || 5}%</td></tr>
+                        <tr><th>Meta Mensal:</th><td>${formatarMoeda(func.metaMensal || 50000)}</td></tr>
+                    `;
+                }
+                
+                const content = document.getElementById('detalhesContent');
+                content.innerHTML = `
+                    <div class="text-center mb-3">
+                        <i class="bi bi-person-circle" style="font-size: 4em; color: var(--accent-primary);"></i>
+                        <h4 class="mt-2">${func.nomeCompleto || ''}</h4>
+                        <span class="status-badge ${func.ativo ? 'status-ativo' : 'status-inativo'}">
+                            ${func.ativo ? 'Ativo' : 'Inativo'}
+                        </span>
+                        ${isVendedor ? '<span class="badge" style="background: var(--info);">Vendedor</span>' : ''}
+                    </div>
+                    
+                    <table class="table table-sm">
+                        <tr><th>ID:</th><td>${func.id}</td></tr>
+                        <tr><th>Email:</th><td>${func.email || '-'}</td></tr>
+                        <tr><th>Telefone:</th><td>${func.telefone || '-'}</td></tr>
+                        <tr><th>Nascimento:</th><td>${func.dataNascimento ? new Date(func.dataNascimento).toLocaleDateString('pt-PT') : '-'}</td></tr>
+                        <tr><th>Cargo:</th><td>${func.cargo || '-'}</td></tr>
+                        <tr><th>Departamento:</th><td>${func.departamento || '-'}</td></tr>
+                        ${vendedorInfo}
+                        <tr><th>Salário Base:</th><td class="fw-bold">${formatarMoeda(func.salarioBase)}</td></tr>
+                        <tr><th>Contrato:</th><td>${func.tipoContrato || '-'}</td></tr>
+                        <tr><th>Contratação:</th><td>${func.dataContratacao ? new Date(func.dataContratacao).toLocaleDateString('pt-PT') : '-'}</td></tr>
+                        ${func.endereco ? `<tr><th>Endereço:</th><td>${func.endereco}</td></tr>` : ''}
+                        ${func.dataDemissao ? `<tr><th>Demissão:</th><td>${new Date(func.dataDemissao).toLocaleDateString('pt-PT')}</td></tr>` : ''}
+                    </table>
+                `;
+                
+                new bootstrap.Modal(document.getElementById('detalhesModal')).show();
+                
+            } catch (error) {
+                console.error('Erro ao carregar detalhes:', error);
+                mostrarToast('Erro ao carregar detalhes', 'danger');
+            }
+        }
+
+        async function demitirFuncionario(id) {
+            if (confirm('Tem certeza que deseja demitir este funcionário?')) {
+                try {
+                    const response = await fetch(`${FUNCIONARIOS_URL}/${id}/demitir`, { 
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    if (response.ok) {
+                        await carregarFuncionarios();
+                        mostrarToast('Funcionário demitido com sucesso', 'success');
+                    } else {
+                        const erro = await response.json();
+                        mostrarToast(erro.message || 'Erro ao demitir funcionário', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Erro ao demitir:', error);
+                    mostrarToast('Erro ao demitir funcionário', 'danger');
+                }
+            }
+        }
+
+        async function reativarFuncionario(id) {
+            if (confirm('Tem certeza que deseja reativar este funcionário?')) {
+                try {
+                    const response = await fetch(`${FUNCIONARIOS_URL}/${id}/reativar`, { 
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    if (response.ok) {
+                        await carregarFuncionarios();
+                        mostrarToast('Funcionário reativado com sucesso', 'success');
+                    } else {
+                        const erro = await response.json();
+                        mostrarToast(erro.message || 'Erro ao reativar funcionário', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Erro ao reativar:', error);
+                    mostrarToast('Erro ao reativar funcionário', 'danger');
+                }
+            }
+        }
+
+        // ==============================================
+        // FUNÇÕES AUXILIARES
+        // ==============================================
+
+        function formatarMoeda(valor) {
+            if (valor === undefined || valor === null) return '0,00 MTn';
+            return valor.toLocaleString('pt-MZ', {
+                style: 'currency',
+                currency: 'MZN',
+                minimumFractionDigits: 2,
+                currencyDisplay: 'code'
+            }).replace('MZN', '').trim() + ' MTn';
+        }
+
+        function mostrarLoading(mostrar) {
+            document.getElementById('loading').classList.toggle('active', mostrar);
+            document.getElementById('tableContainer').style.display = mostrar ? 'none' : 'block';
+        }
+
+        function mostrarToast(mensagem, tipo = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+            
+            const bgColor = {
+                'success': '#06d6a0',
+                'danger': '#ef476f',
+                'warning': '#ffb703',
+                'info': '#4cc9f0'
+            }[tipo] || '#4cc9f0';
+            
+            const html = `
+                <div id="${toastId}" class="toast align-items-center border-0" role="alert" style="background: ${bgColor}; color: white;">
+                    <div class="d-flex">
+                        <div class="toast-body">${mensagem}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', html);
+            
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+            toast.show();
+            
+            toastElement.addEventListener('hidden.bs.toast', function() { this.remove(); });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios - SRH</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        /* ===== TEMA ESCURO ===== */
+        :root {
+            --bg-primary: #0a0c0f;
+            --bg-secondary: #1a1e24;
+            --bg-card: #222831;
+            --bg-card-hover: #2d343d;
+            --text-primary: #ffffff;
+            --text-secondary: #b8c1d1;
+            --accent-primary: #4361ee;
+            --accent-secondary: #7209b7;
+            --border-color: #2f3742;
+            --success: #06d6a0;
+            --warning: #ffb703;
+            --danger: #ef476f;
+            --info: #4cc9f0;
+            --highlight: #ffd166;
+            --zebra-odd: #1e2a3a;
+            --zebra-even: #0f1a24;
+            --valor-venda: #9ad9ff;
+            --valor-comissao: #7cf9b0;
+            --valor-media: #ffd966;
+        }
+
+        body {
+            background: var(--bg-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            background: var(--bg-secondary) !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: var(--text-primary) !important;
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin: 0 5px;
+            border-radius: 8px;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary) !important;
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white !important;
+        }
+
+        /* ===== PAGE HEADER ===== */
+        .page-header {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            margin: 30px 0 20px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .page-header h2 {
+            color: var(--text-primary);
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+        }
+
+        /* ===== PERÍODO SELECTOR ===== */
+        .periodo-selector {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+        }
+
+        .periodo-selector label {
+            color: var(--text-primary);
+        }
+
+        .form-select {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .form-select:focus {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+
+        .badge.bg-info {
+            background: var(--info) !important;
+            color: var(--bg-primary) !important;
+        }
+
+        /* ===== STAT CARDS ===== */
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            height: 100%;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            background: var(--bg-card-hover);
+            border-color: var(--accent-primary);
+        }
+
+        .stat-card i {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+        }
+
+        /* ===== REPORT CARDS ===== */
+        .report-card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            height: 100%;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .report-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 30px rgba(0,0,0,0.4);
+            border-color: var(--accent-primary);
+            background: var(--bg-card-hover);
+        }
+
+        .report-icon {
+            font-size: 3em;
+            color: var(--accent-primary);
+            margin-bottom: 15px;
+        }
+
+        .report-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .report-desc {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .badge-relatorio {
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        .report-card:hover .badge-relatorio {
+            color: white;
+        }
+
+        /* ===== CHART CONTAINER (PREVIEW) ===== */
+        .chart-container {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-container h5 {
+            color: var(--text-primary);
+        }
+
+        .chart-container hr {
+            background-color: var(--border-color);
+            opacity: 0.5;
+        }
+
+        .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        /* ===== TABLE STYLES ===== */
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 10px;
+        }
+
+        .table {
+            color: var(--text-primary);
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .table thead th {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            z-index: 10;
+            padding: 12px;
+        }
+
+        .table tbody td {
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+            padding: 12px;
+        }
+
+        /* ===== EFEITO ZEBRA CORRIGIDO - TEXTO BRANCO EM AMBAS AS CORES ===== */
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #1e2a3a !important;
+        }
+
+        .table-striped tbody tr:nth-of-type(even) {
+            background-color: #0f1a24 !important;
+        }
+
+        /* GARANTIR QUE TODO TEXTO NAS LINHAS ZEBRADAS SEJA BRANCO */
+        .table-striped tbody tr {
+            color: #ffffff !important;
+        }
+
+        .table-striped tbody tr td {
+            color: #ffffff !important;
+        }
+
+        .table-striped tbody tr td strong,
+        .table-striped tbody tr td .fw-bold {
+            color: #ffffff !important;
+        }
+
+        /* CORES ESPECÍFICAS PARA VALORES NAS TABELAS - EXCEÇÕES */
+        .table-striped tbody tr td .valor-venda {
+            color: #9ad9ff !important;
+            font-weight: 600;
+        }
+
+        .table-striped tbody tr td .valor-comissao {
+            color: #7cf9b0 !important;
+            font-weight: 600;
+        }
+
+        .table-striped tbody tr td .valor-media {
+            color: #ffd966 !important;
+            font-weight: 600;
+        }
+
+        /* BADGES MANTÊM SUAS CORES ESPECÍFICAS */
+        .table-striped tbody tr td .badge {
+            color: white !important;
+        }
+
+        .table-striped tbody tr td .badge.bg-primary {
+            background: var(--accent-primary) !important;
+        }
+
+        .table-striped tbody tr td .badge.bg-success {
+            background: #0f8b5e !important;
+        }
+
+        .table-striped tbody tr td .badge.bg-warning {
+            background: #b26500 !important;
+        }
+
+        .table-striped tbody tr td .badge.bg-danger {
+            background: #b12a4a !important;
+        }
+
+        .table-striped tbody tr td .badge.bg-info {
+            background: #2c7da0 !important;
+        }
+
+        .table-striped tbody tr td .badge.bg-secondary {
+            background: var(--bg-secondary) !important;
+            color: white !important;
+            border: 1px solid var(--border-color);
+        }
+
+        /* VENDEDOR BADGE */
+        .table-striped tbody tr td .vendedor-badge {
+            background: var(--info);
+            color: white !important;
+        }
+
+        /* HOVER EFFECT */
+        .table tbody tr:hover {
+            background: var(--accent-primary) !important;
+        }
+
+        .table tbody tr:hover td {
+            color: white !important;
+        }
+
+        .table tbody tr:hover .badge {
+            background: rgba(255,255,255,0.2) !important;
+            color: white !important;
+        }
+
+        .table tbody tr:hover .valor-venda,
+        .table tbody tr:hover .valor-comissao,
+        .table tbody tr:hover .valor-media {
+            color: white !important;
+        }
+
+        .table-info {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* ===== CORES PARA CARDS E OUTROS ELEMENTOS ===== */
+        .text-primary:not(.table-striped td) {
+            color: #7b9cff !important;
+        }
+
+        .text-success:not(.table-striped td) {
+            color: #7cf9b0 !important;
+        }
+
+        .text-warning:not(.table-striped td) {
+            color: #ffd966 !important;
+        }
+
+        .text-danger:not(.table-striped td) {
+            color: #ff8a8a !important;
+        }
+
+        .text-info:not(.table-striped td) {
+            color: #9ad9ff !important;
+        }
+
+        .fw-bold {
+            font-weight: 700 !important;
+        }
+
+        .fs-4 {
+            font-size: 1.5rem !important;
+        }
+
+        /* ===== BADGES ===== */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85em;
+            display: inline-block;
+        }
+
+        .bg-success {
+            background: #0f8b5e !important;
+            color: white !important;
+        }
+
+        .bg-warning {
+            background: #b26500 !important;
+            color: white !important;
+        }
+
+        .bg-danger {
+            background: #b12a4a !important;
+            color: white !important;
+        }
+
+        .bg-info {
+            background: #2c7da0 !important;
+            color: white !important;
+        }
+
+        .bg-secondary {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color);
+        }
+
+        .bg-primary {
+            background: var(--accent-primary) !important;
+            color: white !important;
+        }
+
+        .vendedor-badge {
+            background: #2c7da0;
+            color: white;
+            font-size: 0.7em;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 5px;
+            display: inline-block;
+        }
+
+        /* ===== CARD STYLES ===== */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .card.border-primary {
+            border-color: #7b9cff !important;
+        }
+
+        .card.border-success {
+            border-color: #7cf9b0 !important;
+        }
+
+        .card.border-info {
+            border-color: #9ad9ff !important;
+        }
+
+        .card.border-warning {
+            border-color: #ffd966 !important;
+        }
+
+        .card.border-danger {
+            border-color: #ff8a8a !important;
+        }
+
+        .bg-light {
+            background: var(--bg-secondary) !important;
+        }
+
+        .text-muted {
+            color: var(--text-secondary) !important;
+        }
+
+        /* ===== BREADCRUMB ===== */
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .breadcrumb-item {
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb-item a {
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            color: var(--accent-primary);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--accent-primary);
+        }
+
+        /* ===== LOADING ===== */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 60px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner-border {
+            color: var(--accent-primary) !important;
+        }
+
+        .loading p {
+            color: var(--text-secondary);
+        }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: var(--bg-card) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        .toast .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-outline-primary {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            border-color: var(--text-secondary);
+            color: var(--text-secondary);
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--text-secondary);
+            color: var(--bg-primary);
+        }
+
+        .btn-outline-success {
+            border-color: #0f8b5e;
+            color: #0f8b5e;
+        }
+
+        .btn-outline-success:hover {
+            background: #0f8b5e;
+            color: white;
+        }
+
+        .btn-outline-info {
+            border-color: #2c7da0;
+            color: #2c7da0;
+        }
+
+        .btn-outline-info:hover {
+            background: #2c7da0;
+            color: white;
+        }
+
+        .btn-outline-warning {
+            border-color: #b26500;
+            color: #b26500;
+        }
+
+        .btn-outline-warning:hover {
+            background: #b26500;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            padding: 40px 0;
+            margin-top: 50px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer a:hover {
+            color: var(--text-primary);
+        }
+
+        .footer h5 {
+            color: var(--text-primary);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .page-header div:last-child {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-building"></i> SRH - AlphaSolutions
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/funcionarios">Funcionários</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/folha-pagamento">Folha</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ferias">Férias</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/vendedores">Vendedores</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/relatorios">Relatórios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sobre">Sobre</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active">Relatórios</li>
+            </ol>
+        </nav>
+
+        <!-- Cabeçalho -->
+        <div class="page-header">
+            <h2><i class="bi bi-file-text" style="color: var(--accent-primary);"></i> Relatórios</h2>
+            <p class="mb-0">Visualize relatórios do sistema com dados reais</p>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2">Carregando dados para relatórios...</p>
+        </div>
+
+        <!-- Seletor de Período -->
+        <div class="periodo-selector">
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <label class="fw-bold mb-0">Período:</label>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="mesSelect">
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3" selected>Março</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="anoSelect">
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026" selected>2026</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-outline-primary" onclick="atualizarDados()">
+                        <i class="bi bi-arrow-repeat"></i> Atualizar
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <span class="badge bg-info" id="totalRegistros">0 registros</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards de Estatísticas -->
+        <div class="row mb-4" id="statsCards">
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="bi bi-people" style="color: var(--accent-primary);"></i>
+                    <div class="stat-number" id="totalFuncionarios">0</div>
+                    <div class="stat-label">Total Funcionários</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="bi bi-person-check" style="color: var(--success);"></i>
+                    <div class="stat-number" id="totalAtivos">0</div>
+                    <div class="stat-label">Ativos</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="bi bi-person-x" style="color: var(--danger);"></i>
+                    <div class="stat-number" id="totalInativos">0</div>
+                    <div class="stat-label">Inativos</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="bi bi-cash-stack" style="color: var(--warning);"></i>
+                    <div class="stat-number" id="totalFolha">0 MTn</div>
+                    <div class="stat-label">Folha Mensal</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards de Relatórios -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-4">
+                <div class="report-card" onclick="gerarRelatorio('funcionarios')">
+                    <div class="report-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="report-title">Relatório de Funcionários</div>
+                    <div class="report-desc">Lista completa com dados cadastrais e tipo de contrato</div>
+                    <span class="badge-relatorio"><i class="bi bi-eye"></i> Visualizar</span>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="report-card" onclick="gerarRelatorio('vendedores')">
+                    <div class="report-icon">
+                        <i class="bi bi-shop"></i>
+                    </div>
+                    <div class="report-title">Relatório de Vendedores</div>
+                    <div class="report-desc">Comissões, metas e desempenho de vendas</div>
+                    <span class="badge-relatorio"><i class="bi bi-eye"></i> Visualizar</span>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="report-card" onclick="gerarRelatorio('comissoes')">
+                    <div class="report-icon">
+                        <i class="bi bi-pie-chart"></i>
+                    </div>
+                    <div class="report-title">Relatório de Comissões</div>
+                    <div class="report-desc">Detalhamento completo de comissões por vendedor</div>
+                    <span class="badge-relatorio"><i class="bi bi-eye"></i> Visualizar</span>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="report-card" onclick="gerarRelatorio('salarios')">
+                    <div class="report-icon">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <div class="report-title">Relatório Salarial</div>
+                    <div class="report-desc">Análise de salários, comissões e folha de pagamento</div>
+                    <span class="badge-relatorio"><i class="bi bi-eye"></i> Visualizar</span>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="report-card" onclick="gerarRelatorio('departamentos')">
+                    <div class="report-icon">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <div class="report-title">Relatório por Departamento</div>
+                    <div class="report-desc">Distribuição de funcionários por departamento</div>
+                    <span class="badge-relatorio"><i class="bi bi-eye"></i> Visualizar</span>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="report-card" onclick="gerarRelatorio('aniversariantes')">
+                    <div class="report-icon">
+                        <i class="bi bi-gift"></i>
+                    </div>
+                    <div class="report-title">Aniversariantes</div>
+                    <div class="report-desc">Lista de aniversariantes do mês</div>
+                    <span class="badge-relatorio"><i class="bi bi-eye"></i> Visualizar</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pré-visualização do Relatório -->
+        <div class="chart-container" id="previewArea" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 id="previewTitle">Pré-visualização</h5>
+                <button class="btn-close" onclick="fecharPreview()"></button>
+            </div>
+            <hr>
+            <div id="previewContent" class="table-responsive">
+                <!-- Conteúdo será inserido via JavaScript -->
+            </div>
+            <div class="mt-3 text-end">
+                <button class="btn btn-secondary" onclick="fecharPreview()">
+                    <i class="bi bi-x-circle"></i> Fechar
+                </button>
+            </div>
+        </div>
+
+        <!-- Botões de navegação rápida -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="/" class="btn btn-outline-secondary">
+                        <i class="bi bi-house-door"></i> Home
+                    </a>
+                    <a href="/funcionarios" class="btn btn-outline-primary">
+                        <i class="bi bi-people"></i> Funcionários
+                    </a>
+                    <a href="/folha-pagamento" class="btn btn-outline-success">
+                        <i class="bi bi-cash-stack"></i> Folha
+                    </a>
+                    <a href="/ferias" class="btn btn-outline-info">
+                        <i class="bi bi-calendar-check"></i> Férias
+                    </a>
+                    <a href="/vendedores" class="btn btn-outline-info">
+                        <i class="bi bi-shop"></i> Vendedores
+                    </a>
+                    <a href="/sobre" class="btn btn-outline-primary">
+                        <i class="bi bi-info-circle"></i> Sobre
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>SRH - AlphaSolutions</h5>
+                    <p>Relatórios e Estatísticas</p>
+                    <p>
+                        <a href="/" class="me-2">Home</a> |
+                        <a href="/funcionarios" class="me-2">Funcionários</a> |
+                        <a href="/folha-pagamento" class="me-2">Folha</a> |
+                        <a href="/ferias" class="me-2">Férias</a> |
+                        <a href="/vendedores" class="me-2">Vendedores</a> |
+                        <a href="/relatorios" class="me-2">Relatórios</a> |
+                        <a href="/sobre" class="me-2">Sobre</a>
+                    </p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p>&copy; 2026 - Todos os direitos reservados</p>
+                    <p>Versão 1.0.0</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Configuração dos endpoints
+        const API_BASE = 'https://srh-api.onrender.com/api';
+        const FUNCIONARIOS_URL = API_BASE + '/funcionarios';
+        const COMISSOES_URL = API_BASE + '/comissoes';
+        
+        let dadosFuncionarios = [];
+        let dadosComissoes = [];
+        let dadosVendedores = [];
+        let dadosAniversariantes = [];
+        
+        const meses = [
+            'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        ];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarDados();
+        });
+
+        async function carregarDados() {
+            mostrarLoading(true);
+            
+            try {
+                // Carregar funcionários
+                console.log('Carregando funcionários...');
+                const responseFunc = await fetch(FUNCIONARIOS_URL);
+                if (responseFunc.ok) {
+                    dadosFuncionarios = await responseFunc.json();
+                    console.log('Funcionários carregados:', dadosFuncionarios.length);
+                } else {
+                    throw new Error('Erro ao carregar funcionários');
+                }
+                
+                // Filtrar vendedores
+                dadosVendedores = dadosFuncionarios.filter(f => 
+                    f.departamento && f.departamento.toUpperCase() === 'VENDAS'
+                );
+                
+                // Carregar comissões do período
+                const mes = document.getElementById('mesSelect').value;
+                const ano = document.getElementById('anoSelect').value;
+                
+                dadosComissoes = [];
+                for (const vendedor of dadosVendedores) {
+                    try {
+                        const response = await fetch(`${COMISSOES_URL}/vendedor/${vendedor.id}?mes=${mes}&ano=${ano}`);
+                        if (response.ok) {
+                            const comissoes = await response.json();
+                            dadosComissoes = [...dadosComissoes, ...comissoes.map(c => ({
+                                ...c,
+                                vendedorNome: vendedor.nomeCompleto,
+                                vendedorId: vendedor.id
+                            }))];
+                        }
+                    } catch (error) {
+                        console.error(`Erro ao carregar comissões do vendedor ${vendedor.id}:`, error);
+                    }
+                }
+                
+                console.log('Comissões carregadas:', dadosComissoes.length);
+                
+                // Calcular aniversariantes do mês atual
+                calcularAniversariantes();
+                
+                // Atualizar estatísticas
+                atualizarEstatisticas();
+                
+                document.getElementById('totalRegistros').textContent = 
+                    `${dadosFuncionarios.length} funcionários`;
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                mostrarToast('Erro ao carregar dados: ' + error.message, 'danger');
+            } finally {
+                mostrarLoading(false);
+            }
+        }
+
+        function calcularAniversariantes() {
+            const mesAtual = new Date().getMonth() + 1; // 1-12
+            dadosAniversariantes = dadosFuncionarios.filter(f => {
+                if (!f.dataNascimento) return false;
+                const data = new Date(f.dataNascimento);
+                return (data.getMonth() + 1) === mesAtual;
+            }).map(f => ({
+                ...f,
+                idade: new Date().getFullYear() - new Date(f.dataNascimento).getFullYear(),
+                dia: new Date(f.dataNascimento).getDate()
+            })).sort((a, b) => a.dia - b.dia);
+        }
+
+        function atualizarEstatisticas() {
+            const total = dadosFuncionarios.length;
+            const ativos = dadosFuncionarios.filter(f => f.ativo).length;
+            const inativos = total - ativos;
+            
+            // Calcular folha mensal (salário base + comissões)
+            let totalFolha = 0;
+            dadosFuncionarios.forEach(func => {
+                if (func.ativo) {
+                    totalFolha += func.salarioBase || 0;
+                }
+            });
+            
+            // Adicionar comissões
+            dadosComissoes.forEach(c => {
+                totalFolha += c.valorComissao || 0;
+            });
+            
+            document.getElementById('totalFuncionarios').textContent = total;
+            document.getElementById('totalAtivos').textContent = ativos;
+            document.getElementById('totalInativos').textContent = inativos;
+            document.getElementById('totalFolha').textContent = formatarMoeda(totalFolha);
+        }
+
+        function gerarRelatorio(tipo) {
+            const previewArea = document.getElementById('previewArea');
+            const previewTitle = document.getElementById('previewTitle');
+            const previewContent = document.getElementById('previewContent');
+            
+            previewArea.style.display = 'block';
+            
+            switch(tipo) {
+                case 'funcionarios':
+                    previewTitle.innerHTML = ' Relatório de Funcionários (com tipo de contrato)';
+                    previewContent.innerHTML = gerarTabelaFuncionarios();
+                    break;
+                case 'vendedores':
+                    previewTitle.innerHTML = ' Relatório de Vendedores';
+                    previewContent.innerHTML = gerarRelatorioVendedores();
+                    break;
+                case 'comissoes':
+                    previewTitle.innerHTML = ' Relatório de Comissões';
+                    previewContent.innerHTML = gerarRelatorioComissoes();
+                    break;
+                case 'salarios':
+                    previewTitle.innerHTML = ' Relatório Salarial';
+                    previewContent.innerHTML = gerarRelatorioSalarial();
+                    break;
+                case 'departamentos':
+                    previewTitle.innerHTML = ' Relatório por Departamento';
+                    previewContent.innerHTML = gerarRelatorioDepartamentos();
+                    break;
+                case 'aniversariantes':
+                    previewTitle.innerHTML = ' Aniversariantes';
+                    previewContent.innerHTML = gerarAniversariantes();
+                    break;
+            }
+            
+            // Scroll suave até o preview
+            previewArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        function gerarTabelaFuncionarios() {
+            if (dadosFuncionarios.length === 0) {
+                return '<p class="text-center">Nenhum funcionário encontrado</p>';
+            }
+            
+            let html = `
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Cargo</th>
+                            <th>Departamento</th>
+                            <th>Salário Base</th>
+                            <th>Tipo Contrato</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            dadosFuncionarios.sort((a, b) => a.id - b.id).forEach(f => {
+                const isVendedor = f.departamento === 'Vendas';
+                const tipoContrato = f.tipoContrato || 'CLT';
+                const contratoClass = 
+                    tipoContrato === 'CLT' ? 'bg-primary' : 
+                    tipoContrato === 'PJ' ? 'bg-info' : 
+                    tipoContrato === 'Estágio' ? 'bg-success' : 'bg-secondary';
+                
+                html += `
+                    <tr>
+                        <td><strong>#${f.id}</strong></td>
+                        <td>
+                            ${f.nomeCompleto || '-'}
+                            ${isVendedor ? '<span class="vendedor-badge">Vendedor</span>' : ''}
+                        </td>
+                        <td>${f.email || '-'}</td>
+                        <td>${f.cargo || '-'}</td>
+                        <td><span class="badge bg-secondary">${f.departamento || '-'}</span></td>
+                        <td><strong>${formatarMoeda(f.salarioBase)}</strong></td>
+                        <td><span class="badge ${contratoClass}">${tipoContrato}</span></td>
+                        <td>
+                            <span class="badge ${f.ativo ? 'bg-success' : 'bg-danger'}">
+                                ${f.ativo ? 'Ativo' : 'Inativo'}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            return html;
+        }
+        
+        function gerarRelatorioVendedores() {
+            if (dadosVendedores.length === 0) {
+                return '<p class="text-center">Nenhum vendedor encontrado</p>';
+            }
+            
+            let html = `
+                <h6 class="mb-3">Desempenho de Vendedores - ${meses[document.getElementById('mesSelect').value-1]}/${document.getElementById('anoSelect').value}</h6>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Vendedor</th>
+                            <th>Comissão</th>
+                            <th>Meta</th>
+                            <th>Vendas</th>
+                            <th>Comissões</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            dadosVendedores.forEach(v => {
+                // Calcular total de vendas e comissões do período
+                const comissoesVendedor = dadosComissoes.filter(c => c.vendedorId === v.id);
+                const totalVendas = comissoesVendedor.reduce((sum, c) => sum + (c.valorVenda || 0), 0);
+                const totalComissao = comissoesVendedor.reduce((sum, c) => sum + (c.valorComissao || 0), 0);
+                const meta = v.metaMensal || 50000;
+                const atingiuMeta = totalVendas >= meta;
+                
+                html += `
+                    <tr>
+                        <td><strong>${v.codigoVendedor || 'VEND-' + v.id}</strong></td>
+                        <td>${v.nomeCompleto}</td>
+                        <td>${v.percentualComissao || 5}%</td>
+                        <td><strong>${formatarMoeda(meta)}</strong></td>
+                        <td><strong>${formatarMoeda(totalVendas)}</strong></td>
+                        <td><strong>${formatarMoeda(totalComissao)}</strong></td>
+                        <td>
+                            <span class="badge ${atingiuMeta ? 'bg-success' : 'bg-warning'}">
+                                ${atingiuMeta ? '✓ Atingiu meta' : '⏳ Não atingiu'}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            return html;
+        }
+        
+        function gerarRelatorioComissoes() {
+            if (dadosComissoes.length === 0) {
+                return '<p class="text-center">Nenhuma comissão registrada no período</p>';
+            }
+            
+            // Agrupar comissões por vendedor para mostrar totais
+            const comissoesPorVendedor = {};
+            dadosComissoes.forEach(c => {
+                if (!comissoesPorVendedor[c.vendedorId]) {
+                    comissoesPorVendedor[c.vendedorId] = {
+                        nome: c.vendedorNome,
+                        totalVendas: 0,
+                        totalComissao: 0,
+                        quantidade: 0,
+                        percentual: c.percentualComissao || 5
+                    };
+                }
+                comissoesPorVendedor[c.vendedorId].totalVendas += c.valorVenda || 0;
+                comissoesPorVendedor[c.vendedorId].totalComissao += c.valorComissao || 0;
+                comissoesPorVendedor[c.vendedorId].quantidade++;
+            });
+            
+            // Totais gerais
+            const totalVendasPeriodo = dadosComissoes.reduce((sum, c) => sum + (c.valorVenda || 0), 0);
+            const totalComissoesPeriodo = dadosComissoes.reduce((sum, c) => sum + (c.valorComissao || 0), 0);
+            
+            let html = `
+                <h6 class="mb-3"> Detalhamento de Comissões - ${meses[document.getElementById('mesSelect').value-1]}/${document.getElementById('anoSelect').value}</h6>
+                
+                <!-- Cards de resumo -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card p-3 text-center border-info">
+                            <small class="text-muted">Total de Vendas</small>
+                            <strong class="text-info fs-4">${formatarMoeda(totalVendasPeriodo)}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card p-3 text-center border-success">
+                            <small class="text-muted">Total de Comissões</small>
+                            <strong class="text-success fs-4">${formatarMoeda(totalComissoesPeriodo)}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card p-3 text-center border-primary">
+                            <small class="text-muted">Total de Transações</small>
+                            <strong class="text-primary fs-4">${dadosComissoes.length}</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tabela detalhada -->
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Vendedor</th>
+                            <th>Data</th>
+                            <th>Valor Venda</th>
+                            <th>%</th>
+                            <th>Valor Comissão</th>
+                            <th>Meta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            dadosComissoes.sort((a, b) => new Date(b.dataRegistro) - new Date(a.dataRegistro)).forEach(c => {
+                const data = c.dataRegistro ? new Date(c.dataRegistro).toLocaleDateString('pt-PT') : '-';
+                html += `
+                    <tr>
+                        <td><strong>${c.vendedorNome || 'Vendedor ' + c.vendedorId}</strong></td>
+                        <td>${data}</td>
+                        <td><span class="valor-venda">${formatarMoeda(c.valorVenda)}</span></td>
+                        <td>${c.percentualComissao || 5}%</td>
+                        <td><span class="valor-comissao">${formatarMoeda(c.valorComissao)}</span></td>
+                        <td>
+                            <span class="badge ${c.metaAtingida ? 'bg-success' : 'bg-warning'}">
+                                ${c.metaAtingida ? '✓ Atingida' : '⏳ Não atingida'}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            // Linha de totais
+            html += `
+                    <tr style="background: var(--bg-secondary); font-weight: bold;">
+                        <td colspan="2" class="text-end">TOTAIS:</td>
+                        <td><span class="valor-venda">${formatarMoeda(totalVendasPeriodo)}</span></td>
+                        <td></td>
+                        <td><span class="valor-comissao">${formatarMoeda(totalComissoesPeriodo)}</span></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- Resumo por vendedor -->
+            <h6 class="mb-3 mt-4"> Resumo por Vendedor</h6>
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Vendedor</th>
+                        <th>Vendas</th>
+                        <th>Comissões</th>
+                        <th>Transações</th>
+                        <th>Média por Venda</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+            
+            Object.values(comissoesPorVendedor).forEach(v => {
+                const mediaPorVenda = v.quantidade > 0 ? v.totalComissao / v.quantidade : 0;
+                html += `
+                    <tr>
+                        <td><strong>${v.nome}</strong></td>
+                        <td><span class="valor-venda">${formatarMoeda(v.totalVendas)}</span></td>
+                        <td><span class="valor-comissao">${formatarMoeda(v.totalComissao)}</span></td>
+                        <td>${v.quantidade}</td>
+                        <td><span class="valor-media">${formatarMoeda(mediaPorVenda)}</span></td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                </tbody>
+            </table>
+            `;
+            
+            return html;
+        }
+        
+        function gerarRelatorioSalarial() {
+            const ativos = dadosFuncionarios.filter(f => f.ativo);
+            const totalSalarios = ativos.reduce((sum, f) => sum + (f.salarioBase || 0), 0);
+            const totalComissoesPeriodo = dadosComissoes.reduce((sum, c) => sum + (c.valorComissao || 0), 0);
+            const totalFolha = totalSalarios + totalComissoesPeriodo;
+            
+            const media = ativos.length > 0 ? totalFolha / ativos.length : 0;
+            const maior = ativos.length > 0 ? Math.max(...ativos.map(f => f.salarioBase || 0)) : 0;
+            const menor = ativos.length > 0 ? Math.min(...ativos.map(f => f.salarioBase || 0)) : 0;
+            
+            return `
+                <h6 class="mb-3">Resumo Salarial - ${meses[document.getElementById('mesSelect').value-1]}/${document.getElementById('anoSelect').value}</h6>
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card p-3 text-center border-primary">
+                            <small class="text-muted">Total Salários</small>
+                            <strong class="text-primary fs-4">${formatarMoeda(totalSalarios)}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card p-3 text-center border-success">
+                            <small class="text-muted">Total Comissões</small>
+                            <strong class="text-success fs-4">${formatarMoeda(totalComissoesPeriodo)}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card p-3 text-center border-info">
+                            <small class="text-muted">Total Folha</small>
+                            <strong class="text-info fs-4">${formatarMoeda(totalFolha)}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card p-3 text-center border-warning">
+                            <small class="text-muted">Média</small>
+                            <strong class="text-warning fs-4">${formatarMoeda(media)}</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card p-3 border-primary">
+                            <h6>Maior Salário Base</h6>
+                            <h3 class="text-primary">${formatarMoeda(maior)}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card p-3 border-warning">
+                            <h6>Menor Salário Base</h6>
+                            <h3 class="text-warning">${formatarMoeda(menor)}</h3>
+                        </div>
+                    </div>
+                </div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Departamento</th>
+                            <th>Funcionários</th>
+                            <th>Total Salários</th>
+                            <th>Total Comissões</th>
+                            <th>Total Folha</th>
+                            <th>Média</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${gerarLinhasDepartamentoSalarial()}
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        function gerarLinhasDepartamentoSalarial() {
+            const deptos = {};
+            dadosFuncionarios.filter(f => f.ativo).forEach(f => {
+                const depto = f.departamento || 'Outros';
+                if (!deptos[depto]) {
+                    deptos[depto] = {
+                        funcionarios: 0,
+                        totalSalarios: 0,
+                        totalComissoes: 0
+                    };
+                }
+                deptos[depto].funcionarios++;
+                deptos[depto].totalSalarios += f.salarioBase || 0;
+            });
+            
+            // Adicionar comissões por departamento
+            dadosComissoes.forEach(c => {
+                const vendedor = dadosFuncionarios.find(f => f.id === c.vendedorId);
+                if (vendedor) {
+                    const depto = vendedor.departamento || 'Vendas';
+                    if (!deptos[depto]) {
+                        deptos[depto] = {
+                            funcionarios: 0,
+                            totalSalarios: 0,
+                            totalComissoes: 0
+                        };
+                    }
+                    deptos[depto].totalComissoes += c.valorComissao || 0;
+                }
+            });
+            
+            let html = '';
+            for (const [depto, dados] of Object.entries(deptos)) {
+                const totalFolha = dados.totalSalarios + dados.totalComissoes;
+                const media = dados.funcionarios > 0 ? totalFolha / dados.funcionarios : 0;
+                
+                html += `
+                    <tr>
+                        <td><strong>${depto}</strong></td>
+                        <td>${dados.funcionarios}</td>
+                        <td><strong class="text-primary">${formatarMoeda(dados.totalSalarios)}</strong></td>
+                        <td><strong class="text-success">${formatarMoeda(dados.totalComissoes)}</strong></td>
+                        <td><strong class="text-info">${formatarMoeda(totalFolha)}</strong></td>
+                        <td><strong class="text-warning">${formatarMoeda(media)}</strong></td>
+                    </tr>
+                `;
+            }
+            return html;
+        }
+        
+        function gerarRelatorioDepartamentos() {
+            const deptos = {};
+            dadosFuncionarios.forEach(f => {
+                const depto = f.departamento || 'Outros';
+                if (!deptos[depto]) {
+                    deptos[depto] = {
+                        total: 0,
+                        ativos: 0,
+                        inativos: 0,
+                        funcionarios: 0,
+                        vendedores: 0
+                    };
+                }
+                deptos[depto].funcionarios++;
+                if (f.ativo) {
+                    deptos[depto].ativos++;
+                } else {
+                    deptos[depto].inativos++;
+                }
+                if (f.departamento === 'Vendas') {
+                    deptos[depto].vendedores++;
+                }
+            });
+            
+            let html = `
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Departamento</th>
+                            <th>Total</th>
+                            <th>Ativos</th>
+                            <th>Inativos</th>
+                            <th>Vendedores</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            for (const [depto, dados] of Object.entries(deptos)) {
+                html += `
+                    <tr>
+                        <td><strong>${depto}</strong></td>
+                        <td>${dados.funcionarios}</td>
+                        <td><span class="badge bg-success">${dados.ativos}</span></td>
+                        <td><span class="badge bg-danger">${dados.inativos}</span></td>
+                        <td><span class="badge bg-info">${dados.vendedores || 0}</span></td>
+                    </tr>
+                `;
+            }
+            
+            html += '</tbody></table>';
+            return html;
+        }
+        
+        function gerarAniversariantes() {
+            const mesAtual = meses[new Date().getMonth()];
+            
+            if (dadosAniversariantes.length === 0) {
+                return `<p class="text-center">Nenhum aniversariante em ${mesAtual}</p>`;
+            }
+            
+            let html = `
+                <h6 class="mb-3"> Aniversariantes de ${mesAtual}</h6>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Data Nascimento</th>
+                            <th>Idade</th>
+                            <th>Departamento</th>
+                            <th>Cargo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            dadosAniversariantes.forEach(a => {
+                const dataNasc = new Date(a.dataNascimento);
+                const dataFormatada = dataNasc.toLocaleDateString('pt-PT');
+                
+                html += `
+                    <tr>
+                        <td><strong>${a.nomeCompleto}</strong></td>
+                        <td><span class="badge" style="background: var(--highlight); color: #000;">${dataFormatada}</span></td>
+                        <td><span class="badge bg-info">${a.idade} anos</span></td>
+                        <td><span class="badge bg-secondary">${a.departamento || '-'}</span></td>
+                        <td>${a.cargo || '-'}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            return html;
+        }
+        
+        function atualizarDados() {
+            carregarDados();
+        }
+        
+        function fecharPreview() {
+            document.getElementById('previewArea').style.display = 'none';
+        }
+        
+        function formatarMoeda(valor) {
+            if (valor === undefined || valor === null) return '0,00 MTn';
+            return valor.toLocaleString('pt-MZ', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + ' MTn';
+        }
+        
+        function mostrarLoading(mostrar) {
+            document.getElementById('loading').classList.toggle('active', mostrar);
+        }
+        
+        function mostrarToast(mensagem, tipo = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+            
+            const bgColor = {
+                'success': 'bg-success',
+                'danger': 'bg-danger',
+                'warning': 'bg-warning',
+                'info': 'bg-info'
+            }[tipo] || 'bg-info';
+            
+            const html = `
+                <div id="${toastId}" class="toast align-items-center border-0" role="alert" style="background: var(--${bgColor.replace('bg-', '')}); color: white;">
+                    <div class="d-flex">
+                        <div class="toast-body">${mensagem}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', html);
+            
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
+            toast.show();
+            
+            toastElement.addEventListener('hidden.bs.toast', function() { this.remove(); });
+        }
+    </script>
+</body>
+</html>
