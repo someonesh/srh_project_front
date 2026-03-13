@@ -465,6 +465,88 @@
             box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
         }
 
+        /* ===== NOVOS ESTILOS PARA O MODAL DE IMPORTAÇÃO ===== */
+        .modal .stat-item {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal .stat-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border-color: var(--accent-primary);
+        }
+
+        .modal .stat-item i {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .modal .stat-item h3 {
+            color: var(--text-primary);
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .modal .stat-item small {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+
+        .modal .accordion-item {
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+
+        .modal .accordion-button {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            box-shadow: none;
+        }
+
+        .modal .accordion-button:not(.collapsed) {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .modal .accordion-button::after {
+            filter: invert(1);
+        }
+
+        .modal .accordion-body {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            padding: 15px;
+        }
+
+        .modal .accordion-body pre {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow: auto;
+            font-size: 0.8rem;
+            margin: 0;
+        }
+
+        .modal .alert {
+            border-radius: 10px;
+            margin-top: 15px;
+            margin-bottom: 0;
+        }
+
+        .modal .alert-danger {
+            background: rgba(239, 71, 111, 0.2);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
         /* ===== FOOTER ===== */
         .footer {
             background: var(--bg-secondary);
@@ -577,7 +659,6 @@
                 <p class="mb-0">Controle de comissões, metas e integração com folha de pagamento</p>
             </div>
             <div>
-                <!-- 🔥 BOTÃO PARA PUXAR VENDAS DA API -->
                 <button class="btn btn-info me-2" onclick="puxarVendasAPI()">
                     <i class="bi bi-cloud-download"></i> Puxar Vendas da API
                 </button>
@@ -780,7 +861,35 @@
             }
         }
 
+        // ========== NOVO POPUP MAIS LIMPO ==========
         function mostrarResultadoImportacao(resultado) {
+            // Parse do resultado para extrair informações estruturadas
+            const linhas = resultado.split('\n');
+            const resumo = {
+                totalVendas: 0,
+                importadas: 0,
+                ignoradas: 0,
+                removidas: 0,
+                sucesso: resultado.includes('✅') && !resultado.includes('❌')
+            };
+            
+            // Extrair números do resumo
+            linhas.forEach(linha => {
+                if (linha.includes('Total de vendas processadas:')) {
+                    resumo.totalVendas = parseInt(linha.match(/\d+/)?.[0] || 0);
+                }
+                if (linha.includes('Comissões importadas:')) {
+                    resumo.importadas = parseInt(linha.match(/\d+/)?.[0] || 0);
+                }
+                if (linha.includes('Vendas ignoradas:')) {
+                    resumo.ignoradas = parseInt(linha.match(/\d+/)?.[0] || 0);
+                }
+                if (linha.includes('comissões removidas')) {
+                    const match = linha.match(/(\d+)/);
+                    if (match) resumo.removidas = parseInt(match[0]);
+                }
+            });
+            
             const modalId = 'modalResultado';
             let modal = document.getElementById(modalId);
             
@@ -792,18 +901,83 @@
                 document.body.appendChild(modal);
             }
             
+            // Determinar cor do status
+            const statusColor = resumo.sucesso ? 'var(--success)' : 'var(--danger)';
+            const statusIcon = resumo.sucesso ? '✅' : '❌';
+            const statusTexto = resumo.sucesso ? 'Importação Concluída' : 'Falha na Importação';
+            
             modal.innerHTML = `
-                <div class="modal-dialog modal-lg">
+                <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">✅ Resultado da Importação</h5>
+                        <div class="modal-header" style="background: ${statusColor};">
+                            <h5 class="modal-title">
+                                <i class="bi ${resumo.sucesso ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2"></i>
+                                ${statusIcon} ${statusTexto}
+                            </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
-                            <pre style="background: var(--bg-secondary); color: var(--text-primary); padding: 15px; border-radius: 5px; max-height: 400px; overflow: auto;">${resultado}</pre>
+                            <!-- Cards de Resumo -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-6">
+                                    <div class="stat-item text-center">
+                                        <i class="bi bi-cart-check" style="color: var(--info);"></i>
+                                        <h3>${resumo.totalVendas}</h3>
+                                        <small class="text-muted">Total de Vendas</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item text-center">
+                                        <i class="bi bi-check-circle" style="color: var(--success);"></i>
+                                        <h3>${resumo.importadas}</h3>
+                                        <small class="text-muted">Comissões Importadas</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item text-center">
+                                        <i class="bi bi-x-circle" style="color: var(--warning);"></i>
+                                        <h3>${resumo.ignoradas}</h3>
+                                        <small class="text-muted">Vendas Ignoradas</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item text-center">
+                                        <i class="bi bi-trash" style="color: var(--danger);"></i>
+                                        <h3>${resumo.removidas}</h3>
+                                        <small class="text-muted">Comissões Antigas</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Detalhes (opcional, com accordion) -->
+                            <div class="accordion" id="accordionDetalhes">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetalhes">
+                                            <i class="bi bi-info-circle me-2"></i> Ver detalhes completos
+                                        </button>
+                                    </h2>
+                                    <div id="collapseDetalhes" class="accordion-collapse collapse" data-bs-parent="#accordionDetalhes">
+                                        <div class="accordion-body">
+                                            <pre>${resultado}</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Mensagem de erro, se houver -->
+                            ${!resumo.sucesso ? `
+                                <div class="alert alert-danger mt-3 mb-0">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    Ocorreu um erro durante a importação. Verifique os detalhes para mais informações.
+                                </div>
+                            ` : ''}
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                            <button type="button" class="btn btn-primary" onclick="carregarVendedores()" data-bs-dismiss="modal">
+                                <i class="bi bi-arrow-repeat me-2"></i>Atualizar Lista
+                            </button>
                         </div>
                     </div>
                 </div>
