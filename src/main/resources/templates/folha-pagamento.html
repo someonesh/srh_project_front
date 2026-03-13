@@ -820,33 +820,15 @@
             }
         }
 
-        // ========== NOVO POPUP MAIS LIMPO ==========
 // ========== POPUP SUPER LIMPO (SÓ NÚMEROS) ==========
 function mostrarResultadoSincronizacao(resultado) {
-    // Parse do resultado para extrair informações estruturadas
+    // Extrair apenas o número de vendas
     const linhas = resultado.split('\n');
-    const resumo = {
-        totalVendas: 0,
-        importadas: 0,
-        ignoradas: 0,
-        removidas: 0,
-        sucesso: resultado.includes('✅') && !resultado.includes('❌')
-    };
+    let totalVendas = 0;
     
-    // Extrair números do resumo
     linhas.forEach(linha => {
         if (linha.includes('Total de vendas processadas:')) {
-            resumo.totalVendas = parseInt(linha.match(/\d+/)?.[0] || 0);
-        }
-        if (linha.includes('Comissões importadas:')) {
-            resumo.importadas = parseInt(linha.match(/\d+/)?.[0] || 0);
-        }
-        if (linha.includes('Vendas ignoradas:')) {
-            resumo.ignoradas = parseInt(linha.match(/\d+/)?.[0] || 0);
-        }
-        if (linha.includes('comissões removidas')) {
-            const match = linha.match(/(\d+)/);
-            if (match) resumo.removidas = parseInt(match[0]);
+            totalVendas = parseInt(linha.match(/\d+/)?.[0] || 0);
         }
     });
     
@@ -861,65 +843,25 @@ function mostrarResultadoSincronizacao(resultado) {
         document.body.appendChild(modal);
     }
     
-    // Determinar cor do status
-    const statusColor = resumo.sucesso ? 'var(--success)' : 'var(--danger)';
-    const statusIcon = resumo.sucesso ? '✅' : '❌';
-    const statusTexto = resumo.sucesso ? 'Importação Concluída' : 'Falha na Importação';
-    
     modal.innerHTML = `
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
-                <div class="modal-header" style="background: ${statusColor};">
+                <div class="modal-header" style="background: var(--success);">
                     <h5 class="modal-title">
-                        <i class="bi ${resumo.sucesso ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2"></i>
-                        ${statusIcon} ${statusTexto}
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        ✅ Sincronização
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <!-- Cards de Resumo - APENAS NÚMEROS -->
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <div class="stat-item text-center p-3">
-                                <i class="bi bi-cart-check fs-1" style="color: var(--info);"></i>
-                                <h2 class="mt-2 mb-0">${resumo.totalVendas}</h2>
-                                <small class="text-muted">Total Vendas</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stat-item text-center p-3">
-                                <i class="bi bi-check-circle fs-1" style="color: var(--success);"></i>
-                                <h2 class="mt-2 mb-0">${resumo.importadas}</h2>
-                                <small class="text-muted">Importadas</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stat-item text-center p-3">
-                                <i class="bi bi-x-circle fs-1" style="color: var(--warning);"></i>
-                                <h2 class="mt-2 mb-0">${resumo.ignoradas}</h2>
-                                <small class="text-muted">Ignoradas</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stat-item text-center p-3">
-                                <i class="bi bi-trash fs-1" style="color: var(--danger);"></i>
-                                <h2 class="mt-2 mb-0">${resumo.removidas}</h2>
-                                <small class="text-muted">Removidas</small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Mensagem de erro simples, se houver -->
-                    ${!resumo.sucesso ? `
-                        <div class="alert alert-danger mt-3 mb-0 text-center py-2">
-                            <small><i class="bi bi-exclamation-triangle-fill me-1"></i> Erro na importação</small>
-                        </div>
-                    ` : ''}
+                <div class="modal-body text-center py-4">
+                    <i class="bi bi-cart-check" style="font-size: 3rem; color: var(--info);"></i>
+                    <h1 class="display-4 fw-bold mt-3" style="color: var(--info);">${totalVendas}</h1>
+                    <p class="text-muted mb-0">vendas recebidas</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
-                    <button type="button" class="btn btn-primary btn-sm" onclick="carregarDados()" data-bs-dismiss="modal">
-                        <i class="bi bi-arrow-repeat me-1"></i>Atualizar
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" onclick="carregarDados()" data-bs-dismiss="modal">
+                        <i class="bi bi-arrow-repeat me-2"></i>Atualizar
                     </button>
                 </div>
             </div>
